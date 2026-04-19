@@ -1,9 +1,9 @@
 import { createServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
-import { EmployeesTable } from '@/components/employees/employees-table'
+import { SalaryTable } from '@/components/employees/salary-table'
 import type { Role } from '@/constants/roles'
 
-export default async function EmployeesPage() {
+export default async function SalaryPage() {
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -13,8 +13,8 @@ export default async function EmployeesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Employees</h1>
-      <EmployeesTable userRole={userRole} />
+      <h1 className="text-2xl font-semibold tracking-tight">Salary Management</h1>
+      <SalaryTable userRole={userRole} />
     </div>
   )
 }

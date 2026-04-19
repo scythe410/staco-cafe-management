@@ -83,7 +83,16 @@
   - `useRealtimeOrders()` hook — Supabase Realtime subscription on INSERT/UPDATE to orders table, auto-invalidates React Query cache
   - `components/orders/realtime-listener.tsx` — drop-in client component that activates the subscription
   - Realtime active on both dashboard and orders pages
-- [ ] Employee + salary module
+- [x] Employee + salary module
+  - `hooks/useEmployees.ts` — useEmployees, useCreateEmployee, useUpdateEmployee, useSalaries, useUpsertSalary, useRecordPayment
+  - `components/employees/employees-table.tsx` — employee list with role-based column visibility (salary amounts owner-only)
+  - `components/employees/employee-dialog.tsx` — add/edit employee form (name, role, contact, joining date, salary type, base salary, status)
+  - `components/employees/salary-table.tsx` — monthly salary view with month selector, payment recording, printable salary slip
+  - `components/employees/salary-dialog.tsx` — edit overtime/advances/deductions with auto net salary calculation
+  - `app/(protected)/employees/page.tsx` — employee list page
+  - `app/(protected)/employees/salary/page.tsx` — salary management page
+  - Manager role added to /employees route; manager sees names + paid status only, owner sees all amounts
+  - Generate slip opens printable salary slip in new window
 
 ### 🔴 Phase 4 — Reports & Notifications
 - [ ] Reports module (PDF + Excel export)

@@ -14,7 +14,7 @@ export type Role = (typeof ROLES)[keyof typeof ROLES]
 // owner is implicitly allowed everywhere — checked first in proxy.
 export const ROLE_ALLOWED_ROUTES: Record<Role, string[]> = {
   owner: ['/'],                                          // full access
-  manager: ['/dashboard', '/orders', '/inventory', '/finance', '/reports', '/notifications'],
+  manager: ['/dashboard', '/orders', '/inventory', '/finance', '/employees', '/reports', '/notifications'],
   cashier: ['/dashboard', '/orders'],
   inventory: ['/dashboard', '/inventory'],
   kitchen: ['/dashboard', '/orders/kitchen'],
