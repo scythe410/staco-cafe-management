@@ -66,6 +66,9 @@ export function useCreateIngredient() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ingredients'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard', 'lowStock'] })
+      queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStock'] })
+      queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStockCount'] })
+      queryClient.invalidateQueries({ queryKey: ['ingredients', 'lastRestock'] })
     },
   })
 }
@@ -93,6 +96,77 @@ export function useUpdateIngredient() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ingredients'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard', 'lowStock'] })
+      queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStock'] })
+      queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStockCount'] })
+      queryClient.invalidateQueries({ queryKey: ['ingredients', 'lastRestock'] })
+    },
+  })
+}
+
+// ─── Low stock ingredients ──────────────────────────────────────
+export interface LowStockIngredient {
+  id: string
+  name: string
+  unit: string
+  quantity: number
+  min_stock_level: number
+  shortfall: number
+}
+
+export function useLowStockIngredients() {
+  return useQuery({
+    queryKey: ['ingredients', 'lowStock'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('low_stock_ingredients')
+        .select('id, name, unit, quantity, min_stock_level, shortfall')
+        .order('shortfall', { ascending: false })
+
+      if (error) throw error
+      return (data ?? []) as LowStockIngredient[]
+    },
+  })
+}
+
+// ─── Low stock count (for badge) ────────────────────────────────
+export function useLowStockCount() {
+  return useQuery({
+    queryKey: ['ingredients', 'lowStockCount'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('low_stock_ingredients')
+        .select('id', { count: 'exact', head: true })
+
+      if (error) throw error
+      return count ?? 0
+    },
+  })
+}
+
+// ─── Last restock date per ingredient ───────────────────────────
+export function useLastRestockDates(ingredientIds: string[]) {
+  return useQuery({
+    queryKey: ['ingredients', 'lastRestock', ingredientIds],
+    enabled: ingredientIds.length > 0,
+    queryFn: async () => {
+      // Get the most recent stock_in for each ingredient
+      const { data, error } = await supabase
+        .from('stock_updates')
+        .select('ingredient_id, created_at')
+        .in('ingredient_id', ingredientIds)
+        .eq('type', 'stock_in')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      // Keep only the most recent per ingredient
+      const map: Record<string, string> = {}
+      for (const row of data ?? []) {
+        if (!map[row.ingredient_id]) {
+          map[row.ingredient_id] = row.created_at
+        }
+      }
+      return map
     },
   })
 }
@@ -124,6 +198,9 @@ export function useCreateStockUpdate() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ingredients'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard', 'lowStock'] })
+      queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStock'] })
+      queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStockCount'] })
+      queryClient.invalidateQueries({ queryKey: ['ingredients', 'lastRestock'] })
     },
   })
 }

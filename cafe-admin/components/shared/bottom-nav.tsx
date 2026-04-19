@@ -4,9 +4,11 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { NAV_ITEMS } from '@/constants/navigation'
+import { useLowStockCount } from '@/hooks/useInventory'
 
 export function BottomNav() {
   const pathname = usePathname()
+  const { data: lowStockCount } = useLowStockCount()
 
   return (
     <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 border-t bg-background">
@@ -25,7 +27,14 @@ export function BottomNav() {
                   : 'text-muted-foreground hover:text-foreground',
               )}
             >
-              <item.icon className="h-5 w-5" />
+              <span className="relative">
+                <item.icon className="h-5 w-5" />
+                {item.href === '/inventory' && !!lowStockCount && (
+                  <span className="absolute -top-1.5 -right-2 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-medium text-destructive-foreground">
+                    {lowStockCount}
+                  </span>
+                )}
+              </span>
               <span className="text-[10px] leading-tight">{item.label}</span>
             </Link>
           )

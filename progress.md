@@ -58,7 +58,12 @@
   - Low stock queries the `low_stock_ingredients` DB view
   - Revenue trend buckets completed orders by day for last 7 days
 - [ ] Financial analytics module
-- [ ] Inventory module
+- [x] Inventory module
+  - `hooks/useInventory.ts` — useIngredients, useSuppliers, CRUD mutations, useLowStockIngredients, useLowStockCount, useLastRestockDates
+  - `components/inventory/` — InventoryTable, AddItemDialog, EditItemDialog, StockUpdateDialog, LowStockTable, LowStockLink
+  - `app/(protected)/inventory/page.tsx` — main inventory page with table + low stock link
+  - `app/(protected)/inventory/low-stock/page.tsx` — low stock alerts page (items below min level, shortfall, last restock date, restock button)
+  - Badge count on Inventory nav link (sidebar + bottom nav) showing low stock item count
 - [ ] Order management module
 - [ ] Employee + salary module
 
