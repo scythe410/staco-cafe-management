@@ -1,7 +1,7 @@
 # Build Progress — Cafe Management App
 
 ## Current status
-🟡 In progress — Phase 1 complete, Next.js project not yet initialised
+✅ MVP 1 COMPLETE — All phases done (Database, App Shell, Core Modules, Reports & Notifications)
 
 ## Phases
 
@@ -50,7 +50,7 @@
   - `lib/types.ts` — all database entity TypeScript interfaces
   - `DESIGN.md` — design system reference (spacing, colours, badges, typography)
 
-### 🟡 Phase 3 — Core Modules
+### ✅ Phase 3 — Core Modules (COMPLETE)
 - [x] Dashboard — real data via React Query hooks + Supabase
   - `hooks/useDashboard.ts` — 6 hooks: useTodaySales, useTodayOrderCounts, useTodayProfitEstimate, useLowStockItems, useOrdersBySource, useRevenueTrend
   - `constants/orders.ts` — ORDER_STATUS, ORDER_SOURCE, PENDING_STATUSES, ORDER_SOURCE_LABELS
@@ -94,7 +94,7 @@
   - Manager role added to /employees route; manager sees names + paid status only, owner sees all amounts
   - Generate slip opens printable salary slip in new window
 
-### 🟡 Phase 4 — Reports & Notifications
+### ✅ Phase 4 — Reports & Notifications (COMPLETE)
 - [x] Reports module (PDF + Excel export)
   - `hooks/useReports.ts` — useDailySalesReport, useMonthlyIncomeReport, useStockReport, useSalaryReport
   - `lib/utils.ts` — downloadCSV (CSV export), printReport (print-optimised HTML window)
@@ -105,7 +105,15 @@
   - `components/reports/salary-report.tsx` — salary details per month with paid/unpaid status
   - `components/reports/export-buttons.tsx` — reusable CSV + Print/PDF export buttons
   - All reports support CSV download and print-optimised PDF via window.print()
-- [ ] Notifications (in-app, low stock + salary due alerts)
+- [x] Notifications (in-app, low stock + salary due alerts)
+  - `hooks/useNotifications.ts` — useNotifications, useUnreadCount, useMarkAsRead, useMarkAllRead, useRealtimeNotifications
+  - `components/shared/notification-bell.tsx` — bell icon with unread badge, popover dropdown with last 10 notifications, mark as read on click, mark all read button
+  - `components/shared/protected-shell.tsx` — top bar added with notification bell (visible on all protected pages)
+  - `components/ui/popover.tsx` — shadcn/ui popover component
+  - `supabase/migrations/002_notification_triggers.sql` — Realtime enabled on notifications, salary_due notification function + pg_cron schedule (25th monthly)
+  - Low stock trigger already in 001 (fires on ingredient quantity drop below min)
+  - Salary due: `generate_salary_due_notifications()` function checks for active employees without paid salary for current month, avoids duplicates
+  - Realtime subscription on notifications table keeps bell count updated live
 
 ## Decisions made
 - Currency stored in cents (integer) in DB, converted to LKR on display
@@ -117,7 +125,10 @@
 - None
 
 ## Notes for next session
-- Phase 2 complete. Next: Phase 3 — build core modules (finance, inventory, orders, employees).
+- MVP 1 is complete. All core modules, reports, and notifications are built and working.
+- Next steps: testing, polish, deploy to Vercel, or start Phase 2 features.
+- Run `supabase/migrations/002_notification_triggers.sql` in Supabase SQL editor to enable notification Realtime + salary due function.
+- Enable pg_cron extension in Supabase Dashboard, then schedule salary due notifications (see migration 002 comments).
 - Middleware file is `middleware.ts` (export `middleware`), NOT `proxy.ts`.
 - Supabase clients are split: `lib/supabase.ts` (browser + middleware) and `lib/supabase-server.ts` (server components only).
 - Auth users created via Supabase Dashboard, NOT seed SQL. Role set in raw_user_meta_data via SQL update.
