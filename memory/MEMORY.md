@@ -1,0 +1,1 @@
+- [Commit message style](feedback_commit_style.md) — no Co-Authored-By lines in commits
