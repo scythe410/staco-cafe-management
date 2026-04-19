@@ -24,3 +24,56 @@ export function formatCurrency(cents: number): string {
 export function formatDate(date: string | Date): string {
   return format(new Date(date), "dd MMM yyyy")
 }
+
+/**
+ * Convert a 2D array (headers + rows) to CSV and trigger a download.
+ */
+export function downloadCSV(headers: string[], rows: string[][], filename: string) {
+  const escape = (v: string) => {
+    if (v.includes(",") || v.includes('"') || v.includes("\n")) {
+      return `"${v.replace(/"/g, '""')}"`
+    }
+    return v
+  }
+  const csv = [headers.map(escape).join(",")]
+    .concat(rows.map((row) => row.map(escape).join(",")))
+    .join("\n")
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+/**
+ * Open a print-optimised window with the given HTML content.
+ */
+export function printReport(title: string, bodyHtml: string) {
+  const w = window.open("", "_blank", "width=800,height=900")
+  if (!w) return
+  w.document.write(`<!DOCTYPE html>
+<html><head><title>${title}</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; padding: 40px; max-width: 700px; margin: 0 auto; color: #111; }
+  h1 { font-size: 20px; margin-bottom: 4px; }
+  h2 { font-size: 14px; color: #666; font-weight: normal; margin-top: 0; margin-bottom: 24px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+  th, td { padding: 6px 8px; font-size: 13px; text-align: left; border-bottom: 1px solid #e5e5e5; }
+  th { font-weight: 600; background: #f9f9f9; }
+  td.num { text-align: right; }
+  th.num { text-align: right; }
+  .low-stock { color: #dc2626; font-weight: 600; }
+  .summary { margin-top: 16px; padding: 16px; background: #f9f9f9; border-radius: 8px; }
+  .summary p { margin: 4px 0; font-size: 14px; }
+  .footer { margin-top: 40px; font-size: 11px; color: #999; }
+  @media print { body { padding: 20px; } .no-print { display: none; } }
+</style></head><body>
+${bodyHtml}
+<p class="footer">Staco Cafe — Generated on ${formatDate(new Date())}</p>
+</body></html>`)
+  w.document.close()
+  w.print()
+}

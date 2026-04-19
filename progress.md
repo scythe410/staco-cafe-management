@@ -94,8 +94,17 @@
   - Manager role added to /employees route; manager sees names + paid status only, owner sees all amounts
   - Generate slip opens printable salary slip in new window
 
-### 🔴 Phase 4 — Reports & Notifications
-- [ ] Reports module (PDF + Excel export)
+### 🟡 Phase 4 — Reports & Notifications
+- [x] Reports module (PDF + Excel export)
+  - `hooks/useReports.ts` — useDailySalesReport, useMonthlyIncomeReport, useStockReport, useSalaryReport
+  - `lib/utils.ts` — downloadCSV (CSV export), printReport (print-optimised HTML window)
+  - `components/reports/reports-view.tsx` — report type selector + date/month picker
+  - `components/reports/daily-sales-report.tsx` — orders by day with source/payment breakdowns, summary cards
+  - `components/reports/monthly-income-report.tsx` — revenue by source, expenses by category, net profit KPIs
+  - `components/reports/stock-report.tsx` — all ingredients with low stock flagging, total stock value
+  - `components/reports/salary-report.tsx` — salary details per month with paid/unpaid status
+  - `components/reports/export-buttons.tsx` — reusable CSV + Print/PDF export buttons
+  - All reports support CSV download and print-optimised PDF via window.print()
 - [ ] Notifications (in-app, low stock + salary due alerts)
 
 ## Decisions made

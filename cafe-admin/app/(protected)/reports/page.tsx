@@ -1,10 +1,10 @@
+import { ReportsView } from '@/components/reports/reports-view'
+
 export default function ReportsPage() {
   return (
-    <div>
+    <div className="space-y-6">
       <h1 className="text-2xl font-semibold tracking-tight">Reports</h1>
-      <p className="text-sm text-muted-foreground mt-1">
-        Daily sales, monthly income, and stock reports with PDF/Excel export will appear here.
-      </p>
+      <ReportsView />
     </div>
   )
 }
