@@ -50,7 +50,13 @@
   - `lib/types.ts` — all database entity TypeScript interfaces
   - `DESIGN.md` — design system reference (spacing, colours, badges, typography)
 
-### 🔴 Phase 3 — Core Modules
+### 🟡 Phase 3 — Core Modules
+- [x] Dashboard — real data via React Query hooks + Supabase
+  - `hooks/useDashboard.ts` — 6 hooks: useTodaySales, useTodayOrderCounts, useTodayProfitEstimate, useLowStockItems, useOrdersBySource, useRevenueTrend
+  - `constants/orders.ts` — ORDER_STATUS, ORDER_SOURCE, PENDING_STATUSES, ORDER_SOURCE_LABELS
+  - 6 widget components wired to live Supabase data with loading/error/empty states
+  - Low stock queries the `low_stock_ingredients` DB view
+  - Revenue trend buckets completed orders by day for last 7 days
 - [ ] Financial analytics module
 - [ ] Inventory module
 - [ ] Order management module
