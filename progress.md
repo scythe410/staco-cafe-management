@@ -64,7 +64,13 @@
   - `app/(protected)/inventory/page.tsx` — main inventory page with table + low stock link
   - `app/(protected)/inventory/low-stock/page.tsx` — low stock alerts page (items below min level, shortfall, last restock date, restock button)
   - Badge count on Inventory nav link (sidebar + bottom nav) showing low stock item count
-- [ ] Order management module
+- [x] Order management module
+  - `hooks/useOrders.ts` — useOrders (filterable), useOrderDetail, useMenuItems, useUpdateOrderStatus, useCreateOrder
+  - `constants/orders.ts` — expanded with status labels/variants, next-status workflow, source colors, payment method constants, commission sources
+  - `components/orders/orders-table.tsx` — filterable table (source, status, payment method, date range, search by ID/customer), click row opens detail
+  - `components/orders/order-detail-dialog.tsx` — full order view with line items, totals, commission for delivery platforms, net amount, status advance/cancel buttons
+  - `components/orders/add-order-dialog.tsx` — manual order entry: source, customer, payment, menu item selector with qty +/-, auto-calculated total, commission field for delivery sources
+  - `app/(protected)/orders/page.tsx` — orders page with table + new order button
 - [ ] Employee + salary module
 
 ### 🔴 Phase 4 — Reports & Notifications

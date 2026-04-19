@@ -1,10 +1,10 @@
+import { OrdersTable } from '@/components/orders/orders-table'
+
 export default function OrdersPage() {
   return (
-    <div>
+    <div className="space-y-6">
       <h1 className="text-2xl font-semibold tracking-tight">Orders</h1>
-      <p className="text-sm text-muted-foreground mt-1">
-        All channels, status workflow, and payment tracking will appear here.
-      </p>
+      <OrdersTable />
     </div>
   )
 }
