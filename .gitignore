@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Environment files — never commit
+.env
+.env.local
+.env.*.local
+
+# Supabase local dev
+.supabase/
+
+# Claude Code local settings
+.claude/
+
+# OS
+.DS_Store
+
+# Misc
+*.log
