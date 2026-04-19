@@ -89,6 +89,22 @@ end;
 $$ language plpgsql;
 
 -- ----------------------------------------------------------------
+-- Helper: get_my_role()
+-- Returns the role of the currently-authenticated user without
+-- triggering RLS recursion (SECURITY DEFINER bypasses RLS).
+-- All policies must use this instead of querying users directly.
+-- ----------------------------------------------------------------
+create or replace function get_my_role()
+returns text
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select role::text from users where id = auth.uid();
+$$;
+
+-- ----------------------------------------------------------------
 -- TABLE: users
 -- ----------------------------------------------------------------
 create table users (
@@ -109,12 +125,8 @@ alter table users enable row level security;
 -- owner: full access
 create policy "owner_all_users" on users
   for all to authenticated
-  using (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'owner')
-  )
-  with check (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'owner')
-  );
+  using (get_my_role() = 'owner')
+  with check (get_my_role() = 'owner');
 
 -- everyone: read own row
 create policy "self_read_users" on users
@@ -143,20 +155,8 @@ alter table suppliers enable row level security;
 -- owner + manager + inventory role: full access
 create policy "owner_manager_inventory_all_suppliers" on suppliers
   for all to authenticated
-  using (
-    exists (
-      select 1 from users u
-      where u.id = auth.uid()
-        and u.role in ('owner', 'manager', 'inventory')
-    )
-  )
-  with check (
-    exists (
-      select 1 from users u
-      where u.id = auth.uid()
-        and u.role in ('owner', 'manager', 'inventory')
-    )
-  );
+  using (get_my_role() in ('owner', 'manager', 'inventory'))
+  with check (get_my_role() in ('owner', 'manager', 'inventory'));
 
 -- ----------------------------------------------------------------
 -- TABLE: ingredients
@@ -186,27 +186,13 @@ alter table ingredients enable row level security;
 
 create policy "owner_manager_inventory_all_ingredients" on ingredients
   for all to authenticated
-  using (
-    exists (
-      select 1 from users u
-      where u.id = auth.uid()
-        and u.role in ('owner', 'manager', 'inventory')
-    )
-  )
-  with check (
-    exists (
-      select 1 from users u
-      where u.id = auth.uid()
-        and u.role in ('owner', 'manager', 'inventory')
-    )
-  );
+  using (get_my_role() in ('owner', 'manager', 'inventory'))
+  with check (get_my_role() in ('owner', 'manager', 'inventory'));
 
 -- kitchen: read-only on ingredients
 create policy "kitchen_read_ingredients" on ingredients
   for select to authenticated
-  using (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'kitchen')
-  );
+  using (get_my_role() = 'kitchen');
 
 -- ----------------------------------------------------------------
 -- TABLE: menu_items
@@ -233,31 +219,13 @@ alter table menu_items enable row level security;
 -- owner + manager: full access
 create policy "owner_manager_all_menu_items" on menu_items
   for all to authenticated
-  using (
-    exists (
-      select 1 from users u
-      where u.id = auth.uid()
-        and u.role in ('owner', 'manager')
-    )
-  )
-  with check (
-    exists (
-      select 1 from users u
-      where u.id = auth.uid()
-        and u.role in ('owner', 'manager')
-    )
-  );
+  using (get_my_role() in ('owner', 'manager'))
+  with check (get_my_role() in ('owner', 'manager'));
 
 -- cashier + kitchen: read-only
 create policy "cashier_kitchen_read_menu_items" on menu_items
   for select to authenticated
-  using (
-    exists (
-      select 1 from users u
-      where u.id = auth.uid()
-        and u.role in ('cashier', 'kitchen')
-    )
-  );
+  using (get_my_role() in ('cashier', 'kitchen'));
 
 -- ----------------------------------------------------------------
 -- TABLE: recipe_items
@@ -284,26 +252,12 @@ alter table recipe_items enable row level security;
 
 create policy "owner_manager_all_recipe_items" on recipe_items
   for all to authenticated
-  using (
-    exists (
-      select 1 from users u
-      where u.id = auth.uid()
-        and u.role in ('owner', 'manager')
-    )
-  )
-  with check (
-    exists (
-      select 1 from users u
-      where u.id = auth.uid()
-        and u.role in ('owner', 'manager')
-    )
-  );
+  using (get_my_role() in ('owner', 'manager'))
+  with check (get_my_role() in ('owner', 'manager'));
 
 create policy "kitchen_read_recipe_items" on recipe_items
   for select to authenticated
-  using (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'kitchen')
-  );
+  using (get_my_role() = 'kitchen');
 
 -- ----------------------------------------------------------------
 -- TABLE: orders
@@ -336,46 +290,26 @@ alter table orders enable row level security;
 -- owner + manager: full access
 create policy "owner_manager_all_orders" on orders
   for all to authenticated
-  using (
-    exists (
-      select 1 from users u
-      where u.id = auth.uid()
-        and u.role in ('owner', 'manager')
-    )
-  )
-  with check (
-    exists (
-      select 1 from users u
-      where u.id = auth.uid()
-        and u.role in ('owner', 'manager')
-    )
-  );
+  using (get_my_role() in ('owner', 'manager'))
+  with check (get_my_role() in ('owner', 'manager'));
 
 -- cashier: insert + select + update (status workflow), no delete
 create policy "cashier_read_orders" on orders
   for select to authenticated
-  using (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'cashier')
-  );
+  using (get_my_role() = 'cashier');
 
 create policy "cashier_insert_orders" on orders
   for insert to authenticated
-  with check (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'cashier')
-  );
+  with check (get_my_role() = 'cashier');
 
 create policy "cashier_update_orders" on orders
   for update to authenticated
-  using (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'cashier')
-  );
+  using (get_my_role() = 'cashier');
 
 -- kitchen: read-only (preparing/ready workflow view)
 create policy "kitchen_read_orders" on orders
   for select to authenticated
-  using (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'kitchen')
-  );
+  using (get_my_role() = 'kitchen');
 
 -- ----------------------------------------------------------------
 -- TABLE: order_items
@@ -396,35 +330,17 @@ alter table order_items enable row level security;
 
 create policy "owner_manager_all_order_items" on order_items
   for all to authenticated
-  using (
-    exists (
-      select 1 from users u
-      where u.id = auth.uid()
-        and u.role in ('owner', 'manager')
-    )
-  )
-  with check (
-    exists (
-      select 1 from users u
-      where u.id = auth.uid()
-        and u.role in ('owner', 'manager')
-    )
-  );
+  using (get_my_role() in ('owner', 'manager'))
+  with check (get_my_role() in ('owner', 'manager'));
 
 create policy "cashier_all_order_items" on order_items
   for all to authenticated
-  using (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'cashier')
-  )
-  with check (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'cashier')
-  );
+  using (get_my_role() = 'cashier')
+  with check (get_my_role() = 'cashier');
 
 create policy "kitchen_read_order_items" on order_items
   for select to authenticated
-  using (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'kitchen')
-  );
+  using (get_my_role() = 'kitchen');
 
 -- ----------------------------------------------------------------
 -- TABLE: expenses
@@ -453,24 +369,18 @@ alter table expenses enable row level security;
 -- owner: full access
 create policy "owner_all_expenses" on expenses
   for all to authenticated
-  using (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'owner')
-  )
-  with check (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'owner')
-  );
+  using (get_my_role() = 'owner')
+  with check (get_my_role() = 'owner');
 
 -- manager: read + insert (no delete, no update of others' records)
 create policy "manager_read_expenses" on expenses
   for select to authenticated
-  using (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'manager')
-  );
+  using (get_my_role() = 'manager');
 
 create policy "manager_insert_expenses" on expenses
   for insert to authenticated
   with check (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'manager')
+    get_my_role() = 'manager'
     and recorded_by = auth.uid()
   );
 
@@ -501,21 +411,15 @@ alter table employees enable row level security;
 -- owner: full access (including salary details)
 create policy "owner_all_employees" on employees
   for all to authenticated
-  using (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'owner')
-  )
-  with check (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'owner')
-  );
+  using (get_my_role() = 'owner')
+  with check (get_my_role() = 'owner');
 
 -- manager: read-only but NOT salary fields — enforced at application layer
 -- (Postgres RLS is row-level; column masking requires a view or app logic)
 -- We grant read on the row; the application must exclude base_salary for managers.
 create policy "manager_read_employees" on employees
   for select to authenticated
-  using (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'manager')
-  );
+  using (get_my_role() = 'manager');
 
 -- ----------------------------------------------------------------
 -- TABLE: salaries
@@ -547,12 +451,8 @@ alter table salaries enable row level security;
 -- owner only: full access to salary records
 create policy "owner_all_salaries" on salaries
   for all to authenticated
-  using (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'owner')
-  )
-  with check (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'owner')
-  );
+  using (get_my_role() = 'owner')
+  with check (get_my_role() = 'owner');
 
 -- ----------------------------------------------------------------
 -- TABLE: stock_updates
@@ -577,20 +477,8 @@ alter table stock_updates enable row level security;
 -- owner + manager + inventory: full access
 create policy "owner_manager_inventory_all_stock_updates" on stock_updates
   for all to authenticated
-  using (
-    exists (
-      select 1 from users u
-      where u.id = auth.uid()
-        and u.role in ('owner', 'manager', 'inventory')
-    )
-  )
-  with check (
-    exists (
-      select 1 from users u
-      where u.id = auth.uid()
-        and u.role in ('owner', 'manager', 'inventory')
-    )
-  );
+  using (get_my_role() in ('owner', 'manager', 'inventory'))
+  with check (get_my_role() in ('owner', 'manager', 'inventory'));
 
 -- ----------------------------------------------------------------
 -- TABLE: notifications
@@ -611,27 +499,13 @@ alter table notifications enable row level security;
 -- owner + manager: full access to notifications
 create policy "owner_manager_all_notifications" on notifications
   for all to authenticated
-  using (
-    exists (
-      select 1 from users u
-      where u.id = auth.uid()
-        and u.role in ('owner', 'manager')
-    )
-  )
-  with check (
-    exists (
-      select 1 from users u
-      where u.id = auth.uid()
-        and u.role in ('owner', 'manager')
-    )
-  );
+  using (get_my_role() in ('owner', 'manager'))
+  with check (get_my_role() in ('owner', 'manager'));
 
 -- inventory role: read-only (to see low-stock notifications)
 create policy "inventory_read_notifications" on notifications
   for select to authenticated
-  using (
-    exists (select 1 from users u where u.id = auth.uid() and u.role = 'inventory')
-  );
+  using (get_my_role() = 'inventory');
 
 -- ----------------------------------------------------------------
 -- Trigger: apply stock change to ingredients.quantity on stock_updates insert

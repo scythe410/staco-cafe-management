@@ -4,18 +4,22 @@
 -- Run AFTER 001_initial_schema.sql
 --
 -- Dev login credentials (all use password: Dev@1234)
---   owner@staco.lk   → owner
+--   ceo@staco.lk     → owner
 --   manager@staco.lk → manager
 --   cashier@staco.lk → cashier
+--
+-- NOTE: auth.users rows are created via Supabase Dashboard (Authentication > Users).
+--       The UUIDs below are the ones assigned by Supabase on creation.
+--       If you recreate these users, update the UUIDs throughout this file.
 -- ============================================================
 
 -- ----------------------------------------------------------------
 -- Helpers: fixed UUIDs so re-runs are idempotent
 -- ----------------------------------------------------------------
 -- Users
--- u_owner   a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
--- u_manager a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12
--- u_cashier a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13
+-- u_owner   be4cc9f0-2a30-49ae-aaf5-a1e3f159f831  (ceo@staco.lk)
+-- u_manager bf0bc2b6-374c-4f11-9e12-5f55c43d75c7  (manager@staco.lk)
+-- u_cashier 93b58a03-3484-407f-a94c-f27788a43856  (cashier@staco.lk)
 
 -- Suppliers
 -- sup_1     b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b01
@@ -55,11 +59,11 @@ insert into auth.users (
   updated_at
 ) values
 (
-  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+  'be4cc9f0-2a30-49ae-aaf5-a1e3f159f831',
   '00000000-0000-0000-0000-000000000000',
   'authenticated',
   'authenticated',
-  'owner@staco.lk',
+  'ceo@staco.lk',
   crypt('Dev@1234', gen_salt('bf', 10)),
   now(),
   '{"provider":"email","providers":["email"]}',
@@ -68,7 +72,7 @@ insert into auth.users (
   now()
 ),
 (
-  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12',
+  'bf0bc2b6-374c-4f11-9e12-5f55c43d75c7',
   '00000000-0000-0000-0000-000000000000',
   'authenticated',
   'authenticated',
@@ -81,7 +85,7 @@ insert into auth.users (
   now()
 ),
 (
-  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13',
+  '93b58a03-3484-407f-a94c-f27788a43856',
   '00000000-0000-0000-0000-000000000000',
   'authenticated',
   'authenticated',
@@ -95,27 +99,71 @@ insert into auth.users (
 )
 on conflict (id) do nothing;
 
+-- auth.identities is required by GoTrue for email sign-in.
+-- Each auth.users row needs a matching identity row.
+insert into auth.identities (
+  id,
+  user_id,
+  provider_id,
+  identity_data,
+  provider,
+  last_sign_in_at,
+  created_at,
+  updated_at
+) values
+(
+  'be4cc9f0-2a30-49ae-aaf5-a1e3f159f831',
+  'be4cc9f0-2a30-49ae-aaf5-a1e3f159f831',
+  'ceo@staco.lk',
+  '{"sub":"be4cc9f0-2a30-49ae-aaf5-a1e3f159f831","email":"ceo@staco.lk"}',
+  'email',
+  now(),
+  now(),
+  now()
+),
+(
+  'bf0bc2b6-374c-4f11-9e12-5f55c43d75c7',
+  'bf0bc2b6-374c-4f11-9e12-5f55c43d75c7',
+  'manager@staco.lk',
+  '{"sub":"bf0bc2b6-374c-4f11-9e12-5f55c43d75c7","email":"manager@staco.lk"}',
+  'email',
+  now(),
+  now(),
+  now()
+),
+(
+  '93b58a03-3484-407f-a94c-f27788a43856',
+  '93b58a03-3484-407f-a94c-f27788a43856',
+  'cashier@staco.lk',
+  '{"sub":"93b58a03-3484-407f-a94c-f27788a43856","email":"cashier@staco.lk"}',
+  'email',
+  now(),
+  now(),
+  now()
+)
+on conflict (id) do nothing;
+
 
 -- ================================================================
 -- SECTION 2: PUBLIC USERS
 -- ================================================================
 insert into users (id, email, full_name, role, created_at) values
 (
-  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
-  'owner@staco.lk',
+  'be4cc9f0-2a30-49ae-aaf5-a1e3f159f831',
+  'ceo@staco.lk',
   'Ravi Jayawardena',
   'owner',
   now() - interval '90 days'
 ),
 (
-  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12',
+  'bf0bc2b6-374c-4f11-9e12-5f55c43d75c7',
   'manager@staco.lk',
   'Samanthi Perera',
   'manager',
   now() - interval '60 days'
 ),
 (
-  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13',
+  '93b58a03-3484-407f-a94c-f27788a43856',
   'cashier@staco.lk',
   'Kasun Fernando',
   'cashier',
@@ -420,7 +468,7 @@ insert into expenses (id, category, amount, description, date, recorded_by) valu
   450000000,  -- LKR 4,500,000/month rent
   'Monthly shop rent — April 2026',
   date_trunc('month', current_date)::date,
-  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
+  'be4cc9f0-2a30-49ae-aaf5-a1e3f159f831'
 ),
 (
   gen_random_uuid(),
@@ -428,7 +476,7 @@ insert into expenses (id, category, amount, description, date, recorded_by) valu
   8500000,    -- LKR 85,000 electricity
   'CEB electricity bill — March 2026',
   (current_date - interval '18 days')::date,
-  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
+  'be4cc9f0-2a30-49ae-aaf5-a1e3f159f831'
 ),
 (
   gen_random_uuid(),
@@ -436,7 +484,7 @@ insert into expenses (id, category, amount, description, date, recorded_by) valu
   1200000,    -- LKR 12,000 water
   'Water bill — March 2026',
   (current_date - interval '18 days')::date,
-  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12'
+  'bf0bc2b6-374c-4f11-9e12-5f55c43d75c7'
 ),
 (
   gen_random_uuid(),
@@ -444,7 +492,7 @@ insert into expenses (id, category, amount, description, date, recorded_by) valu
   35000000,   -- LKR 350,000 produce restock
   'Weekly vegetable & protein restock from Green Leaf Produce',
   (current_date - interval '7 days')::date,
-  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12'
+  'bf0bc2b6-374c-4f11-9e12-5f55c43d75c7'
 ),
 (
   gen_random_uuid(),
@@ -452,7 +500,7 @@ insert into expenses (id, category, amount, description, date, recorded_by) valu
   22500000,   -- LKR 225,000 dry goods
   'Monthly dry goods order — Island Dry Goods Co.',
   (current_date - interval '14 days')::date,
-  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12'
+  'bf0bc2b6-374c-4f11-9e12-5f55c43d75c7'
 ),
 (
   gen_random_uuid(),
@@ -460,7 +508,7 @@ insert into expenses (id, category, amount, description, date, recorded_by) valu
   18000000,   -- LKR 180,000 coffee & tea
   'Coffee beans & tea restock — Ceylon Beverage Suppliers',
   (current_date - interval '10 days')::date,
-  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
+  'be4cc9f0-2a30-49ae-aaf5-a1e3f159f831'
 ),
 (
   gen_random_uuid(),
@@ -468,7 +516,7 @@ insert into expenses (id, category, amount, description, date, recorded_by) valu
   9500000,    -- LKR 95,000 espresso machine service
   'Espresso machine descaling and group head service',
   (current_date - interval '21 days')::date,
-  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
+  'be4cc9f0-2a30-49ae-aaf5-a1e3f159f831'
 ),
 (
   gen_random_uuid(),
@@ -476,7 +524,7 @@ insert into expenses (id, category, amount, description, date, recorded_by) valu
   4200000,    -- LKR 42,000 takeaway packaging
   'Takeaway boxes, cups, and paper bags restock',
   (current_date - interval '5 days')::date,
-  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12'
+  'bf0bc2b6-374c-4f11-9e12-5f55c43d75c7'
 ),
 (
   gen_random_uuid(),
@@ -484,7 +532,7 @@ insert into expenses (id, category, amount, description, date, recorded_by) valu
   12600000,   -- LKR 126,000 PickMe commission
   'PickMe Food platform commission — March 2026',
   (current_date - interval '3 days')::date,
-  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
+  'be4cc9f0-2a30-49ae-aaf5-a1e3f159f831'
 ),
 (
   gen_random_uuid(),
@@ -492,7 +540,7 @@ insert into expenses (id, category, amount, description, date, recorded_by) valu
   3500000,    -- LKR 35,000 misc
   'Staff uniform replacements (3 sets)',
   (current_date - interval '12 days')::date,
-  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
+  'be4cc9f0-2a30-49ae-aaf5-a1e3f159f831'
 );
 
 
