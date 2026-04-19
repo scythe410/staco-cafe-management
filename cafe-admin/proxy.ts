@@ -1,4 +1,4 @@
-// middleware.ts — Next.js route protection
+// proxy.ts — Next.js route protection (renamed from middleware.ts for Next.js 16)
 // Runs before every matched request. Validates Supabase session and
 // enforces role-based access control per the permissions in constants/roles.ts.
 
@@ -7,7 +7,7 @@ import type { NextRequest } from 'next/server'
 import { createProxyClient } from '@/lib/supabase'
 import { ROLES, ROLE_ALLOWED_ROUTES, PUBLIC_AUTH_ROUTES, type Role } from '@/constants/roles'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Build a mutable response so @supabase/ssr can write refreshed
