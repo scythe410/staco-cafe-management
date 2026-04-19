@@ -1,7 +1,7 @@
 # Build Progress — Cafe Management App
 
 ## Current status
-✅ MVP 1 COMPLETE — All phases done (Database, App Shell, Core Modules, Reports & Notifications)
+✅ MVP 1 COMPLETE — All phases done (Database, App Shell, Core Modules, Reports & Notifications, Audit & Deploy Prep)
 
 ## Phases
 
@@ -121,12 +121,22 @@
 - Recipe-based stock deduction deferred to Phase 2 (feature phase, not build phase)
 - Primary breakpoint: 1024px (tablet)
 
+### ✅ Phase 5 — Audit & Deploy Prep (COMPLETE)
+- [x] Full app audit — all 9 checks passed
+  - No console errors, all loading/error states present, form validation, formatCurrency/formatDate usage, tablet layout
+- [x] 404 page — `app/not-found.tsx`
+- [x] Error boundary — `app/error.tsx` (client component with reset)
+- [x] `.env.local.example` — template for required env vars
+- [x] `README.md` — setup instructions, module list, deployment guide
+- [x] TypeScript check — zero errors (`tsc --noEmit` clean)
+- [x] Build check — `next build` passes with zero warnings
+
 ## Known issues / blockers
 - None
 
 ## Notes for next session
-- MVP 1 is complete. All core modules, reports, and notifications are built and working.
-- Next steps: testing, polish, deploy to Vercel, or start Phase 2 features.
+- MVP 1 is fully complete and ready for deployment.
+- Next steps: deploy to Vercel, or start Phase 2 features.
 - Run `supabase/migrations/002_notification_triggers.sql` in Supabase SQL editor to enable notification Realtime + salary due function.
 - Enable pg_cron extension in Supabase Dashboard, then schedule salary due notifications (see migration 002 comments).
 - Middleware file is `middleware.ts` (export `middleware`), NOT `proxy.ts`.
