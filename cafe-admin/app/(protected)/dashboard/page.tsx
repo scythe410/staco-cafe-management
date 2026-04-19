@@ -1,3 +1,4 @@
+import { OrderRealtimeListener } from '@/components/orders/realtime-listener'
 import { SalesCard } from '@/components/dashboard/sales-card'
 import { OrdersSummary } from '@/components/dashboard/orders-summary'
 import { ProfitEstimate } from '@/components/dashboard/profit-estimate'
@@ -8,6 +9,7 @@ import { RevenueTrend } from '@/components/dashboard/revenue-trend'
 export default function DashboardPage() {
   return (
     <div className="space-y-6">
+      <OrderRealtimeListener />
       <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
 
       {/* Top row — KPI cards */}

@@ -71,6 +71,9 @@
   - `components/orders/order-detail-dialog.tsx` — full order view with line items, totals, commission for delivery platforms, net amount, status advance/cancel buttons
   - `components/orders/add-order-dialog.tsx` — manual order entry: source, customer, payment, menu item selector with qty +/-, auto-calculated total, commission field for delivery sources
   - `app/(protected)/orders/page.tsx` — orders page with table + new order button
+  - `useRealtimeOrders()` hook — Supabase Realtime subscription on INSERT/UPDATE to orders table, auto-invalidates React Query cache
+  - `components/orders/realtime-listener.tsx` — drop-in client component that activates the subscription
+  - Realtime active on both dashboard and orders pages
 - [ ] Employee + salary module
 
 ### 🔴 Phase 4 — Reports & Notifications

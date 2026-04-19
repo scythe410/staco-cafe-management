@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createBrowserClient } from '@/lib/supabase'
 import type { Order, OrderItem, MenuItem } from '@/lib/types'
@@ -5,6 +6,41 @@ import type { OrderStatus, OrderSource, PaymentMethod } from '@/constants/orders
 import { ORDER_STATUS } from '@/constants/orders'
 
 const supabase = createBrowserClient()
+
+// ─── Realtime subscription ──────────────────────────────────────
+/**
+ * Subscribes to INSERT and UPDATE events on the orders table.
+ * Invalidates all order and dashboard queries on any change.
+ */
+export function useRealtimeOrders() {
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('orders-realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'orders' },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['orders'] })
+          queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+        },
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'orders' },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['orders'] })
+          queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [queryClient])
+}
 
 // ─── Filters ────────────────────────────────────────────────────
 export interface OrderFilters {
