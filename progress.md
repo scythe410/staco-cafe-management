@@ -57,7 +57,16 @@
   - 6 widget components wired to live Supabase data with loading/error/empty states
   - Low stock queries the `low_stock_ingredients` DB view
   - Revenue trend buckets completed orders by day for last 7 days
-- [ ] Financial analytics module
+- [x] Financial analytics module
+  - `hooks/useFinance.ts` — useFinanceSummary, useRevenueByDay, usePaymentMethodSplit, useMonthComparison, useExpenses, useExpenseBreakdown, useCreateExpense, usePlatformEarnings
+  - `constants/expenses.ts` — EXPENSE_CATEGORY, labels, colors
+  - `components/finance/finance-tabs.tsx` — tabbed layout (Overview, Expenses, Platform Earnings) with shared date range state
+  - `components/finance/date-range-picker.tsx` — preset selector (today/week/month/custom) + custom date inputs
+  - `components/finance/overview-tab.tsx` — KPI cards (income, expenses, net profit, orders), revenue by day bar chart, payment method pie chart, month-over-month comparison with growth %
+  - `components/finance/expenses-tab.tsx` — filterable expense table (category, date range), add expense dialog, expense breakdown donut chart
+  - `components/finance/add-expense-dialog.tsx` — expense entry form (category, amount in LKR→cents, date, description)
+  - `components/finance/platform-tab.tsx` — per-platform cards (gross, commission, net), comparison bar chart
+  - All calculations done via Supabase queries — no derived values stored
 - [x] Inventory module
   - `hooks/useInventory.ts` — useIngredients, useSuppliers, CRUD mutations, useLowStockIngredients, useLowStockCount, useLastRestockDates
   - `components/inventory/` — InventoryTable, AddItemDialog, EditItemDialog, StockUpdateDialog, LowStockTable, LowStockLink
