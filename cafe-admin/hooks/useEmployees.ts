@@ -84,10 +84,12 @@ export function useSalaries(month: string) {
   return useQuery({
     queryKey: ['salaries', month],
     queryFn: async () => {
+      // month comes as 'yyyy-MM' from the date picker; DB stores as date 'yyyy-MM-01'
+      const monthDate = month.length === 7 ? `${month}-01` : month
       const { data, error } = await supabase
         .from('salaries')
         .select('*, employees(full_name)')
-        .eq('month', month)
+        .eq('month', monthDate)
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -113,12 +115,13 @@ export function useUpsertSalary() {
 
   return useMutation({
     mutationFn: async (input: UpsertSalaryInput) => {
+      const monthDate = input.month.length === 7 ? `${input.month}-01` : input.month
       if (input.id) {
         // Update existing
         const { id, ...rest } = input
         const { data, error } = await supabase
           .from('salaries')
-          .update(rest)
+          .update({ ...rest, month: monthDate })
           .eq('id', id)
           .select()
           .single()
@@ -130,7 +133,7 @@ export function useUpsertSalary() {
         const { id: _, ...rest } = input
         const { data, error } = await supabase
           .from('salaries')
-          .insert(rest)
+          .insert({ ...rest, month: monthDate })
           .select()
           .single()
 

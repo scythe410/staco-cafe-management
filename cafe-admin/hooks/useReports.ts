@@ -226,10 +226,11 @@ export function useSalaryReport(month: string) {
     queryKey: ['reports', 'salary', month],
     enabled: !!month,
     queryFn: async () => {
+      const monthDate = month.length === 7 ? `${month}-01` : month
       const { data, error } = await supabase
         .from('salaries')
         .select('id, base_salary, overtime, advances, deductions, net_salary, paid_at, employees(full_name)')
-        .eq('month', month)
+        .eq('month', monthDate)
         .order('created_at')
 
       if (error) throw error
