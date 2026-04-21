@@ -30,7 +30,7 @@ export function BottomNav() {
               <span className="relative">
                 <item.icon className="h-5 w-5" />
                 {item.href === '/inventory' && !!lowStockCount && (
-                  <span className="absolute -top-1.5 -right-2 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-medium text-destructive-foreground">
+                  <span className="absolute -top-1.5 -right-2 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive/10 px-1 text-[9px] font-medium text-destructive">
                     {lowStockCount}
                   </span>
                 )}

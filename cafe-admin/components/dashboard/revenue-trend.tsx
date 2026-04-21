@@ -40,17 +40,17 @@ export function RevenueTrend() {
           <div className="h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={trendData} barSize={32}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2DDD7" />
                 <XAxis
                   dataKey="day"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
+                  tick={{ fontSize: 12, fill: '#7A6658' }}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
+                  tick={{ fontSize: 12, fill: '#7A6658' }}
                   tickFormatter={(value: number) => `${(value / 100_000).toFixed(0)}k`}
                 />
                 <Tooltip
@@ -61,7 +61,7 @@ export function RevenueTrend() {
                     fontSize: '12px',
                   }}
                 />
-                <Bar dataKey="revenue" fill="#18181b" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="revenue" fill="#8B4513" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

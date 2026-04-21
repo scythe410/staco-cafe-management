@@ -156,11 +156,11 @@ export interface SourceData {
 }
 
 const SOURCE_COLORS: Record<string, string> = {
-  dine_in: '#18181b',
-  takeaway: '#71717a',
-  pickmefood: '#a1a1aa',
-  ubereats: '#d4d4d8',
-  other: '#e4e4e7',
+  dine_in: '#2C1810',
+  takeaway: '#8B4513',
+  pickmefood: '#C4622D',
+  ubereats: '#D4882A',
+  other: '#EDE0CF',
 }
 
 export function useOrdersBySource() {

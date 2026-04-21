@@ -23,12 +23,12 @@ export const EXPENSE_CATEGORY_LABELS: Record<ExpenseCategory, string> = {
 }
 
 export const EXPENSE_CATEGORY_COLORS: Record<ExpenseCategory, string> = {
-  ingredients: '#3b82f6',
-  utilities: '#f59e0b',
-  rent: '#ef4444',
-  salaries: '#8b5cf6',
-  maintenance: '#06b6d4',
-  packaging: '#10b981',
-  delivery_commission: '#f97316',
-  other: '#6b7280',
+  ingredients: '#5B7FA6',
+  utilities: '#D4882A',
+  rent: '#C4622D',
+  salaries: '#8B4513',
+  maintenance: '#A08070',
+  packaging: '#D9C9B5',
+  delivery_commission: '#2C1810',
+  other: '#EDE0CF',
 }

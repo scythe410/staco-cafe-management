@@ -119,10 +119,10 @@ export interface PaymentSplit {
 }
 
 const PAYMENT_COLORS: Record<string, string> = {
-  cash: '#3b82f6',
-  card: '#8b5cf6',
-  online: '#10b981',
-  other: '#6b7280',
+  cash: '#8B4513',
+  card: '#D4882A',
+  online: '#C4622D',
+  other: '#A08070',
 }
 
 export function usePaymentMethodSplit(range: DateRange) {

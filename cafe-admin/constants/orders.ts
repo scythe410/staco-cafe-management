@@ -74,11 +74,11 @@ export const ORDER_SOURCE_LABELS: Record<OrderSource, string> = {
 
 /** Tailwind classes for source badges */
 export const ORDER_SOURCE_COLORS: Record<OrderSource, string> = {
-  dine_in: 'bg-blue-100 text-blue-800',
-  takeaway: 'bg-purple-100 text-purple-800',
-  pickmefood: 'bg-orange-100 text-orange-800',
-  ubereats: 'bg-neutral-900 text-white',
-  other: 'bg-gray-100 text-gray-800',
+  dine_in: 'bg-[#2C1810] text-[#F5ECD7]',
+  takeaway: 'bg-[#8B4513] text-[#F5ECD7]',
+  pickmefood: 'bg-[#C4622D] text-[#F5ECD7]',
+  ubereats: 'bg-[#D4882A] text-[#2C1810]',
+  other: 'bg-[#EDE0CF] text-[#2C1810]',
 }
 
 /** Sources that charge a commission */

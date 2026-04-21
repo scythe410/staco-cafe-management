@@ -52,7 +52,7 @@ export function Sidebar({ userName, userRole }: SidebarProps) {
               <item.icon className="h-5 w-5 shrink-0" />
               <span className="flex-1">{item.label}</span>
               {item.href === '/inventory' && !!lowStockCount && (
-                <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-medium text-destructive-foreground">
+                <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive/10 px-1.5 text-[10px] font-medium text-destructive">
                   {lowStockCount}
                 </span>
               )}

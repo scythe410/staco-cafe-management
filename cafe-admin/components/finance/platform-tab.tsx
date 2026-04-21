@@ -111,17 +111,17 @@ export function PlatformTab({ range }: PlatformTabProps) {
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} barSize={28}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2DDD7" />
                 <XAxis
                   dataKey="name"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
+                  tick={{ fontSize: 12, fill: '#7A6658' }}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
+                  tick={{ fontSize: 12, fill: '#7A6658' }}
                   tickFormatter={(v: number) => `${(v / 100_000).toFixed(0)}k`}
                 />
                 <Tooltip
@@ -133,9 +133,9 @@ export function PlatformTab({ range }: PlatformTabProps) {
                   }}
                 />
                 <Legend wrapperStyle={{ fontSize: '12px' }} />
-                <Bar dataKey="Gross Sales" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Commission" fill="#ef4444" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Net Received" fill="#10b981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Gross Sales" fill="#5B7FA6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Commission" fill="#C4622D" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Net Received" fill="#8B4513" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
