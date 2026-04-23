@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createBrowserClient } from '@/lib/supabase'
+import { toast } from 'sonner'
 import type { Notification } from '@/lib/types'
 
 const supabase = createBrowserClient()
@@ -55,6 +56,14 @@ export function useMarkAsRead() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
     },
+    onError: (error) => {
+      console.error('[useMarkAsRead]', error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to mark notification as read.'
+      )
+    },
   })
 }
 
@@ -73,6 +82,14 @@ export function useMarkAllRead() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
+    },
+    onError: (error) => {
+      console.error('[useMarkAllRead]', error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to mark notifications as read.'
+      )
     },
   })
 }

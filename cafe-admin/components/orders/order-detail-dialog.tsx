@@ -38,6 +38,7 @@ import { format } from 'date-fns'
 import { MENU_CATEGORY_LABELS, CATEGORY_BADGE_STYLES } from '@/constants/menu'
 import { ROLES, type Role } from '@/constants/roles'
 import { getBillHtml, getOrderPrintTitle, BILL_STYLES } from './order-bill'
+import { toast } from 'sonner'
 
 interface OrderDetailDialogProps {
   orderId: string | null
@@ -73,7 +74,10 @@ export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = fals
     const title = getOrderPrintTitle(order)
 
     const printWindow = window.open('', '_blank', 'width=400,height=700')
-    if (!printWindow) return
+    if (!printWindow) {
+      toast.error('Popup blocked. Please allow popups for this site and try again.')
+      return
+    }
 
     printWindow.document.write(`<!DOCTYPE html>
 <html>

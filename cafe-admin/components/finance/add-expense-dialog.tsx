@@ -21,6 +21,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useCreateExpense } from '@/hooks/useFinance'
+import { validatePositiveNumber } from '@/lib/validation'
+import { toast } from 'sonner'
 import {
   EXPENSE_CATEGORY,
   EXPENSE_CATEGORY_LABELS,
@@ -49,6 +51,9 @@ export function AddExpenseDialog({ userId }: AddExpenseDialogProps) {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+
+    const amtErr = validatePositiveNumber(amount, 'Amount')
+    if (amtErr) { toast.error(amtErr); return }
 
     createExpense.mutate(
       {

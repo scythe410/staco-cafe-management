@@ -215,10 +215,22 @@
   - Grid columns have proper gap spacing
 - [x] TypeScript check — zero errors
 
+### ✅ Phase 10 — Tier 1 QA Bug Fixes (COMPLETE)
+- [x] Fix 1: Non-atomic order creation — moved to single Supabase RPC (`create_order_with_items`) so order + items insert in one transaction
+- [x] Fix 2: Null-safe `formatCurrency()` and `formatDate()` — handles null/undefined/NaN without crashing
+- [x] Fix 3: Mutation error toasts — all 12 mutations across 5 hook files now show sonner toast on success/error
+- [x] Fix 4: Error boundary logging — `app/error.tsx` now logs to console.error (Sentry not installed, skipped)
+- [x] Fix 5: Negative value validation — 6 forms validated with `validatePositiveNumber()` helper before submit
+- [x] Fix 6: Future month salary validation — salary dialog rejects months after current month
+- [x] Fix 7: Popup blocked feedback — `printReport()` and `handlePrintBill()` show toast when popup is blocked
+- [x] TypeScript check — zero errors
+- [x] Migration: `supabase/migrations/006_create_order_rpc.sql` — must be run in Supabase SQL Editor
+
 ## Known issues / blockers
 - None
 
 ## Notes for next session
+- Run `supabase/migrations/006_create_order_rpc.sql` in Supabase SQL Editor before testing order creation.
 - MVP 1 is fully complete with branding and deployed to Vercel.
 - Next steps: start Phase 2 features (recipe-based inventory deduction, supplier management, forecasting).
 - Run `supabase/migrations/002_notification_triggers.sql` in Supabase SQL editor to enable notification Realtime + salary due function.

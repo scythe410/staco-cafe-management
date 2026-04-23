@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createBrowserClient } from '@/lib/supabase'
+import { toast } from 'sonner'
 import type { Ingredient, Supplier } from '@/lib/types'
 import type { StockUpdateType } from '@/constants/inventory'
 
@@ -69,6 +70,15 @@ export function useCreateIngredient() {
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStock'] })
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStockCount'] })
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lastRestock'] })
+      toast.success('Ingredient added')
+    },
+    onError: (error) => {
+      console.error('[useCreateIngredient]', error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to add ingredient. Please try again.'
+      )
     },
   })
 }
@@ -99,6 +109,15 @@ export function useUpdateIngredient() {
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStock'] })
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStockCount'] })
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lastRestock'] })
+      toast.success('Ingredient updated')
+    },
+    onError: (error) => {
+      console.error('[useUpdateIngredient]', error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to update ingredient. Please try again.'
+      )
     },
   })
 }
@@ -201,6 +220,15 @@ export function useCreateStockUpdate() {
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStock'] })
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStockCount'] })
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lastRestock'] })
+      toast.success('Stock updated')
+    },
+    onError: (error) => {
+      console.error('[useCreateStockUpdate]', error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to update stock. Please try again.'
+      )
     },
   })
 }

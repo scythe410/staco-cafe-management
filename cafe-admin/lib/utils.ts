@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { format } from "date-fns"
+import { toast } from "sonner"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -10,9 +11,12 @@ export function cn(...inputs: ClassValue[]) {
  * Format cents (integer) as LKR with 2 decimal places.
  * e.g. 8925000 → "LKR 89,250.00"
  */
-export function formatCurrency(cents: number): string {
-  const amount = cents / 100
-  return `LKR ${amount.toLocaleString("en-LK", {
+export function formatCurrency(cents: number | null | undefined): string {
+  if (cents === null || cents === undefined || Number.isNaN(cents)) {
+    return 'LKR 0.00'
+  }
+  const lkr = cents / 100
+  return `LKR ${lkr.toLocaleString('en-LK', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`
@@ -21,8 +25,15 @@ export function formatCurrency(cents: number): string {
 /**
  * Format a date string as "dd MMM yyyy" (e.g. "19 Apr 2026").
  */
-export function formatDate(date: string | Date): string {
-  return format(new Date(date), "dd MMM yyyy")
+export function formatDate(input: string | Date | null | undefined): string {
+  if (!input) return '—'
+  try {
+    const date = typeof input === 'string' ? new Date(input) : input
+    if (isNaN(date.getTime())) return '—'
+    return format(date, 'dd MMM yyyy')
+  } catch {
+    return '—'
+  }
 }
 
 /**
@@ -65,7 +76,10 @@ export function downloadCSV(headers: string[], rows: string[][], filename: strin
  */
 export function printReport(title: string, bodyHtml: string) {
   const w = window.open("", "_blank", "width=800,height=900")
-  if (!w) return
+  if (!w) {
+    toast.error('Popup blocked. Please allow popups for this site and try again.')
+    return
+  }
   w.document.write(`<!DOCTYPE html>
 <html><head><title>${title}</title>
 <style>

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createBrowserClient } from '@/lib/supabase'
+import { toast } from 'sonner'
 import type { Employee, Salary } from '@/lib/types'
 
 const supabase = createBrowserClient()
@@ -47,6 +48,15 @@ export function useCreateEmployee() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] })
+      toast.success('Employee added')
+    },
+    onError: (error) => {
+      console.error('[useCreateEmployee]', error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to add employee. Please try again.'
+      )
     },
   })
 }
@@ -73,6 +83,15 @@ export function useUpdateEmployee() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] })
+      toast.success('Employee updated')
+    },
+    onError: (error) => {
+      console.error('[useUpdateEmployee]', error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to update employee. Please try again.'
+      )
     },
   })
 }
@@ -143,6 +162,15 @@ export function useUpsertSalary() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['salaries', variables.month] })
+      toast.success('Salary record saved')
+    },
+    onError: (error) => {
+      console.error('[useUpsertSalary]', error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to save salary record. Please try again.'
+      )
     },
   })
 }
@@ -165,6 +193,15 @@ export function useRecordPayment() {
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['salaries', result.month] })
+      toast.success('Salary marked as paid')
+    },
+    onError: (error) => {
+      console.error('[useRecordPayment]', error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to record payment. Please try again.'
+      )
     },
   })
 }

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createBrowserClient } from '@/lib/supabase'
 import { startOfDay, startOfWeek, startOfMonth, subMonths, endOfMonth, format } from 'date-fns'
+import { toast } from 'sonner'
 import type { Expense } from '@/lib/types'
 import { ORDER_STATUS } from '@/constants/orders'
 import type { ExpenseCategory } from '@/constants/expenses'
@@ -324,6 +325,15 @@ export function useCreateExpense() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['finance'] })
+      toast.success('Expense added')
+    },
+    onError: (error) => {
+      console.error('[useCreateExpense]', error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to add expense. Please try again.'
+      )
     },
   })
 }

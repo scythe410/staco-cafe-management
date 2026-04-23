@@ -12,6 +12,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useUpsertSalary, type SalaryWithEmployee } from '@/hooks/useEmployees'
 import { formatCurrency } from '@/lib/utils'
+import { validatePositiveNumber } from '@/lib/validation'
+import { toast } from 'sonner'
+import { format } from 'date-fns'
 
 interface SalaryDialogProps {
   salary: SalaryWithEmployee | null
@@ -49,9 +52,29 @@ export function SalaryDialog({ salary, month, open, onOpenChange }: SalaryDialog
     [baseSalaryCents, overtimeCents, advancesCents, deductionsCents],
   )
 
+  const maxMonth = format(new Date(), 'yyyy-MM')
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!salary) return
+
+    // Fix 6 — future month validation
+    const selectedMonth = new Date(month + '-01')
+    const currentMonth = new Date()
+    currentMonth.setDate(1)
+    currentMonth.setHours(0, 0, 0, 0)
+    if (selectedMonth > currentMonth) {
+      toast.error('Cannot create salary records for future months')
+      return
+    }
+
+    // Fix 5 — negative value validation
+    const otErr = validatePositiveNumber(overtime || '0', 'Overtime', { allowZero: true })
+    if (otErr) { toast.error(otErr); return }
+    const advErr = validatePositiveNumber(advances || '0', 'Advances', { allowZero: true })
+    if (advErr) { toast.error(advErr); return }
+    const dedErr = validatePositiveNumber(deductions || '0', 'Deductions', { allowZero: true })
+    if (dedErr) { toast.error(dedErr); return }
 
     upsertSalary.mutate(
       {

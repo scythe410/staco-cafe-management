@@ -21,6 +21,8 @@ import {
 } from '@/components/ui/select'
 import { useMenuItems, useCreateOrder } from '@/hooks/useOrders'
 import { formatCurrency } from '@/lib/utils'
+import { validatePositiveNumber } from '@/lib/validation'
+import { toast } from 'sonner'
 import {
   ORDER_SOURCE,
   ORDER_SOURCE_LABELS,
@@ -113,6 +115,16 @@ export function AddOrderDialog() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (lines.length === 0) return
+
+    if (showCommission) {
+      const commErr = validatePositiveNumber(commission || '0', 'Commission', { allowZero: true })
+      if (commErr) { toast.error(commErr); return }
+    }
+
+    for (const line of lines) {
+      const qtyErr = validatePositiveNumber(line.quantity, 'Item quantity')
+      if (qtyErr) { toast.error(qtyErr); return }
+    }
 
     createOrder.mutate(
       {

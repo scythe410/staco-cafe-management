@@ -24,6 +24,8 @@ import {
   type StockUpdateType,
 } from '@/constants/inventory'
 import { useCreateStockUpdate } from '@/hooks/useInventory'
+import { validatePositiveNumber } from '@/lib/validation'
+import { toast } from 'sonner'
 import type { Ingredient } from '@/lib/types'
 
 interface StockUpdateDialogProps {
@@ -42,6 +44,9 @@ export function StockUpdateDialog({ item, userId, open, onOpenChange }: StockUpd
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!item) return
+
+    const qtyErr = validatePositiveNumber(quantity, 'Quantity')
+    if (qtyErr) { toast.error(qtyErr); return }
 
     let qty = parseFloat(quantity)
     // stock_out and wastage reduce quantity, so negate

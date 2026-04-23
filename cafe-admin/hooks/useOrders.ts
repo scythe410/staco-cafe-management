@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createBrowserClient } from '@/lib/supabase'
+import { toast } from 'sonner'
 import type { Order, OrderItem, MenuItem } from '@/lib/types'
 import type { OrderStatus, OrderSource, PaymentMethod } from '@/constants/orders'
 import { ORDER_STATUS } from '@/constants/orders'
@@ -142,6 +143,15 @@ export function useUpdateOrderStatus() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      toast.success('Order status updated')
+    },
+    onError: (error) => {
+      console.error('[useUpdateOrderStatus]', error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to update order status. Please try again.'
+      )
     },
   })
 }
@@ -183,43 +193,37 @@ export function useCreateOrder() {
         0,
       )
 
-      // Insert order
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          source: input.source,
-          status: ORDER_STATUS.NEW_ORDER,
-          customer_name: input.customer_name || null,
-          total_amount: subtotal,
-          discount: 0,
-          tax: 0,
-          commission: input.commission,
-          payment_method: input.payment_method,
-        })
-        .select()
-        .single()
+      const { data, error } = await supabase.rpc('create_order_with_items', {
+        p_source: input.source,
+        p_customer_name: input.customer_name || null,
+        p_payment_method: input.payment_method,
+        p_commission: input.commission,
+        p_discount: 0,
+        p_tax: 0,
+        p_total_amount: subtotal,
+        p_created_by: null,
+        p_items: input.items.map((item) => ({
+          menu_item_id: item.menu_item_id,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+        })),
+      })
 
-      if (orderError) throw orderError
-
-      // Insert order items
-      const orderItems = input.items.map((item) => ({
-        order_id: order.id,
-        menu_item_id: item.menu_item_id,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-      }))
-
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems)
-
-      if (itemsError) throw itemsError
-
-      return order
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      toast.success('Order created')
+    },
+    onError: (error) => {
+      console.error('[useCreateOrder]', error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to create order. Please try again.'
+      )
     },
   })
 }

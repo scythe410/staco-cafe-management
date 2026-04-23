@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/select'
 import { INGREDIENT_CATEGORIES, INGREDIENT_UNITS } from '@/constants/inventory'
 import { useSuppliers } from '@/hooks/useInventory'
+import { validatePositiveNumber } from '@/lib/validation'
+import { toast } from 'sonner'
 import type { Ingredient } from '@/lib/types'
 
 interface IngredientFormProps {
@@ -48,6 +50,14 @@ export function IngredientForm({ initial, onSubmit, isPending }: IngredientFormP
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+
+    const qtyErr = validatePositiveNumber(quantity, 'Quantity', { allowZero: true })
+    if (qtyErr) { toast.error(qtyErr); return }
+    const minErr = validatePositiveNumber(minStock, 'Min stock level', { allowZero: true })
+    if (minErr) { toast.error(minErr); return }
+    const priceErr = validatePositiveNumber(costPrice, 'Cost price', { allowZero: true })
+    if (priceErr) { toast.error(priceErr); return }
+
     onSubmit({
       name: name.trim(),
       category,
