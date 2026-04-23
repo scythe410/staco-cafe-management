@@ -54,6 +54,7 @@ export interface MenuItem {
   category: string
   price: number // cents
   is_available: boolean
+  notes: string | null
   created_at: string
   updated_at: string
 }

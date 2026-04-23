@@ -2,6 +2,8 @@
 
 Tablet-optimised admin web app for managing cafe operations — finances, inventory, orders, employees, and reports.
 
+Built for [Staco Cafe](https://staco.lk) | Powered by [NeuralShift](https://neuralshift.dev)
+
 ## Tech stack
 
 - **Framework:** Next.js 16 (App Router)
@@ -10,6 +12,8 @@ Tablet-optimised admin web app for managing cafe operations — finances, invent
 - **Database / Auth / Realtime:** Supabase (PostgreSQL)
 - **Charts:** Recharts
 - **Data fetching:** TanStack Query (React Query)
+- **Analytics:** Vercel Analytics
+- **Hosting:** Vercel
 
 ## Getting started
 
@@ -40,6 +44,8 @@ Run the migration files in your Supabase SQL editor in order:
 
 1. `supabase/migrations/001_initial_schema.sql` — tables, RLS, triggers, views
 2. `supabase/migrations/002_notification_triggers.sql` — notification realtime + salary due function
+3. `supabase/migrations/003_real_ingredients.sql` — real cafe ingredient data
+4. `supabase/migrations/004_menu_seed.sql` — real Stacko Cafe menu (40 items, 9 categories)
 
 ### 4. Create auth users
 
@@ -78,6 +84,13 @@ Open [http://localhost:3000](http://localhost:3000).
 2. Import the repo in Vercel — set **Root Directory** to `cafe-admin`
 3. Add environment variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
 4. Deploy
+
+## Branding
+
+- Login page displays the Staco Cafe logo and NeuralShift attribution
+- Sidebar includes the owl logo icon
+- Custom favicon and PWA manifest with app icons (16x16, 32x32, 192x192, 512x512)
+- Logo assets stored in `public/logos/`
 
 ## User roles
 

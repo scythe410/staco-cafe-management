@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -28,7 +29,14 @@ export function Sidebar({ userName, userRole }: SidebarProps) {
   return (
     <aside className="hidden lg:flex lg:w-60 lg:flex-col lg:fixed lg:inset-y-0 border-r bg-sidebar">
       {/* Brand */}
-      <div className="flex h-16 items-center px-6 border-b">
+      <div className="flex h-16 items-center px-3 border-b">
+        <Image
+          src="/logos/logo-owl.png"
+          alt="Staco Cafe logo"
+          width={40}
+          height={40}
+          className="-mr-2"
+        />
         <h1 className="text-lg font-semibold tracking-tight">Staco Cafe</h1>
       </div>
 

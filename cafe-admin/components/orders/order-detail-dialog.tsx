@@ -34,6 +34,7 @@ import {
 } from '@/constants/orders'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
+import { MENU_CATEGORY_LABELS, CATEGORY_BADGE_STYLES } from '@/constants/menu'
 
 interface OrderDetailDialogProps {
   orderId: string | null
@@ -138,7 +139,17 @@ export function OrderDetailDialog({ orderId, open, onOpenChange }: OrderDetailDi
                   {order.order_items.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell className="font-medium">
-                        {item.menu_items?.name ?? 'Unknown item'}
+                        <div className="flex items-center gap-2">
+                          {item.menu_items?.name ?? 'Unknown item'}
+                          {item.menu_items?.category && (
+                            <span className={cn(
+                              'inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium shrink-0',
+                              CATEGORY_BADGE_STYLES[item.menu_items.category] ?? 'bg-muted text-muted-foreground',
+                            )}>
+                              {MENU_CATEGORY_LABELS[item.menu_items.category] ?? item.menu_items.category}
+                            </span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-right">{item.quantity}</TableCell>
                       <TableCell className="text-right">{formatCurrency(item.unit_price)}</TableCell>

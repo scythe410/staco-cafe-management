@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import Image from 'next/image'
 
 function LoginForm() {
   const router = useRouter()
@@ -44,12 +45,17 @@ function LoginForm() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-muted/40 px-4">
-      <div className="w-full max-w-sm">
+    <main className="min-h-screen flex flex-col items-center bg-muted/40 px-4">
+      <div className="w-full max-w-sm flex-1 flex flex-col justify-center">
         {/* Logo / brand */}
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold tracking-tight">Staco Cafe</h1>
-          <p className="text-sm text-muted-foreground mt-1">Management Portal</p>
+        <div className="mb-2 flex justify-center pt-6">
+          <Image
+            src="/logos/logo-text.png"
+            alt="Stacko Cafe"
+            width={280}
+            height={280}
+            priority
+          />
         </div>
 
         <Card>
@@ -102,11 +108,22 @@ function LoginForm() {
                 className="w-full h-12 text-base"
                 disabled={loading}
               >
-                {loading ? 'Signing in…' : 'Sign in'}
+                {loading ? 'Signing in...' : 'Sign in'}
               </Button>
             </form>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Powered by NeuralShift */}
+      <div className="mt-auto pb-4 flex flex-col items-center">
+        <p className="text-xs text-muted-foreground -mb-8">Powered by</p>
+        <Image
+          src="/logos/neuralshift-logo.png"
+          alt="NeuralShift"
+          width={160}
+          height={37}
+        />
       </div>
     </main>
   )

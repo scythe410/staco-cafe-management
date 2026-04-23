@@ -131,13 +131,46 @@
 - [x] TypeScript check — zero errors (`tsc --noEmit` clean)
 - [x] Build check — `next build` passes with zero warnings
 
+### ✅ Phase 6 — Branding & Polish (COMPLETE)
+- [x] Vercel Analytics integration (`@vercel/analytics`)
+- [x] Date formatting fix — corrected month date formatting in employee and report hooks
+- [x] UI aesthetics overhaul — improved styling and visual consistency
+- [x] Cafe logos added — `public/logos/logo-owl.png`, `public/logos/logo-text.png`, `public/logos/neuralshift-logo.png`
+- [x] Login page redesign — logo-text image replaces text heading, "Powered by NeuralShift" footer added
+- [x] Sidebar branding — owl logo icon added next to "Staco Cafe" title
+- [x] Favicon & PWA setup — custom favicon (16x16, 32x32), apple-touch-icon (192x192, 512x512), `site.webmanifest`
+- [x] Metadata updated in `app/layout.tsx` — proper favicon references and web manifest
+- [x] Old root-level logo files removed (`cafe-admin/logo-owl.png`, `cafe-admin/logo-text.png`) — assets moved to `public/logos/`
+- [x] Inventory data replaced with real cafe ingredients + migration (`supabase/migrations/003_real_ingredients.sql`)
+- [x] Comprehensive system documentation added (`DESIGN.md`, `CLAUDE.md`)
+
+### ✅ Phase 7 — Real Menu Data (COMPLETE)
+- [x] Real Stacko Cafe menu migration — `supabase/migrations/004_menu_seed.sql`
+  - Adds `notes` column to menu_items (ALTER TABLE IF NOT EXISTS)
+  - Clears sample menu_items, order_items, recipe_items
+  - Inserts 40 real menu items across 9 categories
+  - Categories: coffee, matcha, shakes, waffles, desserts, toppings_scoop, toppings_drizzle, toppings_spread, toppings_savoury
+  - All prices in LKR cents
+- [x] Menu category constants — `constants/menu.ts`
+  - MENU_CATEGORIES with value/label pairs
+  - TOPPING_CATEGORIES, MAIN_CATEGORIES, TOPPING_CATEGORY_LIST groupings
+  - MENU_CATEGORY_LABELS lookup map
+  - CATEGORY_BADGE_STYLES per category group (brown for drinks, rust for food, beige for toppings)
+- [x] Add-order dialog updated — grouped by category with sticky headers, collapsible toppings section
+- [x] Order detail dialog updated — category badge next to each item name with colour-coded styles
+- [x] MenuItem type updated — added `notes` field to `lib/types.ts`
+- [x] No hardcoded prices or menu item names anywhere — all from database via formatCurrency()
+- [x] TypeScript check — zero errors
+
 ## Known issues / blockers
 - None
 
 ## Notes for next session
-- MVP 1 is fully complete and ready for deployment.
-- Next steps: deploy to Vercel, or start Phase 2 features.
+- MVP 1 is fully complete with branding and deployed to Vercel.
+- Next steps: start Phase 2 features (recipe-based inventory deduction, supplier management, forecasting).
 - Run `supabase/migrations/002_notification_triggers.sql` in Supabase SQL editor to enable notification Realtime + salary due function.
+- Run `supabase/migrations/003_real_ingredients.sql` to load real cafe ingredient data.
+- Run `supabase/migrations/004_menu_seed.sql` to load real Stacko menu (adds notes column + 40 menu items).
 - Enable pg_cron extension in Supabase Dashboard, then schedule salary due notifications (see migration 002 comments).
 - Middleware file is `middleware.ts` (export `middleware`), NOT `proxy.ts`.
 - Supabase clients are split: `lib/supabase.ts` (browser + middleware) and `lib/supabase-server.ts` (server components only).
@@ -145,3 +178,6 @@
 - Dev credentials: ceo@staco.lk (owner), manager@staco.lk, cashier@staco.lk — password: 12345
 - UUIDs: owner=be4cc9f0-2a30-49ae-aaf5-a1e3f159f831, manager=bf0bc2b6-374c-4f11-9e12-5f55c43d75c7, cashier=93b58a03-3484-407f-a94c-f27788a43856
 - Env vars needed: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (in `.env.local`).
+- Logo assets live in `public/logos/` — owl icon, text logo, and NeuralShift branding.
+- Login page shows logo-text image and NeuralShift "Powered by" footer.
+- Sidebar shows owl logo next to brand name.

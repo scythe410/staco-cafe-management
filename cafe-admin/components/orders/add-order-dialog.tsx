@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Plus, Minus, Trash2 } from 'lucide-react'
+import { Plus, Minus, Trash2, ChevronDown, ChevronRight } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -30,6 +30,12 @@ import {
   type OrderSource,
   type PaymentMethod,
 } from '@/constants/orders'
+import {
+  MAIN_CATEGORIES,
+  TOPPING_CATEGORY_LIST,
+  MENU_CATEGORY_LABELS,
+} from '@/constants/menu'
+import type { MenuItem } from '@/lib/types'
 
 interface LineItem {
   menu_item_id: string
@@ -48,6 +54,7 @@ export function AddOrderDialog() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PAYMENT_METHOD.CASH)
   const [commission, setCommission] = useState('')
   const [lines, setLines] = useState<LineItem[]>([])
+  const [toppingsExpanded, setToppingsExpanded] = useState(false)
 
   const total = useMemo(
     () => lines.reduce((sum, l) => sum + l.unit_price * l.quantity, 0),
@@ -56,15 +63,24 @@ export function AddOrderDialog() {
 
   const showCommission = COMMISSION_SOURCES.includes(source)
 
-  function addItem(menuItemId: string) {
-    const item = menuItems?.find((m) => m.id === menuItemId)
-    if (!item) return
+  // Group menu items by category
+  const groupedItems = useMemo(() => {
+    if (!menuItems) return new Map<string, MenuItem[]>()
+    const map = new Map<string, MenuItem[]>()
+    for (const item of menuItems) {
+      const list = map.get(item.category) ?? []
+      list.push(item)
+      map.set(item.category, list)
+    }
+    return map
+  }, [menuItems])
 
+  function addItem(item: MenuItem) {
     setLines((prev) => {
-      const existing = prev.find((l) => l.menu_item_id === menuItemId)
+      const existing = prev.find((l) => l.menu_item_id === item.id)
       if (existing) {
         return prev.map((l) =>
-          l.menu_item_id === menuItemId ? { ...l, quantity: l.quantity + 1 } : l,
+          l.menu_item_id === item.id ? { ...l, quantity: l.quantity + 1 } : l,
         )
       }
       return [...prev, { menu_item_id: item.id, name: item.name, quantity: 1, unit_price: item.price }]
@@ -91,6 +107,7 @@ export function AddOrderDialog() {
     setPaymentMethod(PAYMENT_METHOD.CASH)
     setCommission('')
     setLines([])
+    setToppingsExpanded(false)
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -118,17 +135,21 @@ export function AddOrderDialog() {
     )
   }
 
-  // Group menu items by category for the selector
-  const categories = useMemo(() => {
-    if (!menuItems) return []
-    const cats = new Map<string, typeof menuItems>()
-    for (const item of menuItems) {
-      const list = cats.get(item.category) ?? []
-      list.push(item)
-      cats.set(item.category, list)
-    }
-    return Array.from(cats.entries())
-  }, [menuItems])
+  function renderCategoryItems(categoryValue: string) {
+    const items = groupedItems.get(categoryValue)
+    if (!items || items.length === 0) return null
+    return items.map((item) => (
+      <button
+        key={item.id}
+        type="button"
+        className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm hover:bg-accent transition-colors"
+        onClick={() => addItem(item)}
+      >
+        <span>{item.name}</span>
+        <span className="text-muted-foreground ml-2 shrink-0">{formatCurrency(item.price)}</span>
+      </button>
+    ))
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -204,26 +225,54 @@ export function AddOrderDialog() {
             )}
           </div>
 
-          {/* Add items */}
+          {/* Menu items grouped by category */}
           <div className="space-y-2">
             <Label>Add Menu Items</Label>
-            <Select onValueChange={addItem} value="">
-              <SelectTrigger className="h-11">
-                <SelectValue placeholder="Select an item to add..." />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map(([cat, items]) => (
-                  <div key={cat}>
-                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">{cat}</div>
-                    {items.map((item) => (
-                      <SelectItem key={item.id} value={item.id}>
-                        {item.name} — {formatCurrency(item.price)}
-                      </SelectItem>
-                    ))}
+            <div className="rounded-lg border max-h-64 overflow-y-auto">
+              {/* Main categories */}
+              {MAIN_CATEGORIES.map((cat) => {
+                const items = groupedItems.get(cat.value)
+                if (!items || items.length === 0) return null
+                return (
+                  <div key={cat.value}>
+                    <div className="sticky top-0 bg-muted/80 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold text-muted-foreground border-b">
+                      {cat.label}
+                    </div>
+                    {renderCategoryItems(cat.value)}
                   </div>
-                ))}
-              </SelectContent>
-            </Select>
+                )
+              })}
+
+              {/* Toppings — collapsible */}
+              {TOPPING_CATEGORY_LIST.some((cat) => groupedItems.has(cat.value)) && (
+                <div>
+                  <button
+                    type="button"
+                    className="sticky top-0 bg-muted/80 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold text-muted-foreground border-b w-full flex items-center gap-1"
+                    onClick={() => setToppingsExpanded(!toppingsExpanded)}
+                  >
+                    {toppingsExpanded ? (
+                      <ChevronDown className="h-3 w-3" />
+                    ) : (
+                      <ChevronRight className="h-3 w-3" />
+                    )}
+                    Toppings
+                  </button>
+                  {toppingsExpanded && TOPPING_CATEGORY_LIST.map((cat) => {
+                    const items = groupedItems.get(cat.value)
+                    if (!items || items.length === 0) return null
+                    return (
+                      <div key={cat.value}>
+                        <div className="px-3 py-1 text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wider bg-muted/40">
+                          {cat.label}
+                        </div>
+                        {renderCategoryItems(cat.value)}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Line items */}
