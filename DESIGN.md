@@ -1,4 +1,4 @@
-# Staco Cafe Management — Design Themes & Colour Reference
+# Stacko Cafe Management — Design Themes & Colour Reference
 
 ## Base Theme
 

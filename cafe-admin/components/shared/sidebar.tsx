@@ -32,12 +32,12 @@ export function Sidebar({ userName, userRole }: SidebarProps) {
       <div className="flex h-16 items-center px-3 border-b">
         <Image
           src="/logos/logo-owl.png"
-          alt="Staco Cafe logo"
+          alt="Stacko Cafe logo"
           width={40}
           height={40}
           className="-mr-2"
         />
-        <h1 className="text-lg font-semibold tracking-tight">Staco Cafe</h1>
+        <h1 className="text-lg font-semibold tracking-tight">Stacko Cafe</h1>
       </div>
 
       {/* Navigation */}

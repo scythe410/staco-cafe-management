@@ -1,8 +1,8 @@
-# Staco Cafe Management System — Stakeholder Guide
+# Stacko Cafe Management System — Stakeholder Guide
 
 ## What Is This?
 
-Staco Cafe Management is a web-based admin system designed specifically for tablet use. It gives the cafe owner (and authorised staff) a single place to manage every aspect of cafe operations — from taking orders to tracking profits, managing stock, paying employees, and generating reports.
+Stacko Cafe Management is a web-based admin system designed specifically for tablet use. It gives the cafe owner (and authorised staff) a single place to manage every aspect of cafe operations — from taking orders to tracking profits, managing stock, paying employees, and generating reports.
 
 The system is accessed through a web browser (no app download needed) and works best on tablets, though it also works on desktop computers and phones.
 
@@ -421,6 +421,6 @@ Credentials are created by the system administrator. Each user gets:
 
 ## Summary
 
-Staco Cafe Management gives you complete visibility and control over your cafe operations through one system. It tracks every rupee coming in and going out, keeps your stock levels visible, manages your team's salaries, and delivers reports whenever you need them — all accessible from a tablet at your fingertips.
+Stacko Cafe Management gives you complete visibility and control over your cafe operations through one system. It tracks every rupee coming in and going out, keeps your stock levels visible, manages your team's salaries, and delivers reports whenever you need them — all accessible from a tablet at your fingertips.
 
 The system is live, secure, and ready for daily use. Future phases will add automation (recipe-based stock deduction, smart reordering) and integrations (live delivery platform sync) to reduce manual work further.

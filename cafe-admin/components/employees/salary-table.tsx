@@ -55,7 +55,7 @@ export function SalaryTable({ userRole }: SalaryTableProps) {
         .footer { margin-top: 40px; font-size: 12px; color: #999; }
         @media print { body { padding: 20px; } }
       </style></head><body>
-      <h1>Staco Cafe — Salary Slip</h1>
+      <h1>Stacko Cafe — Salary Slip</h1>
       <h2>${format(new Date(month + '-01'), 'MMMM yyyy')}</h2>
       <p><strong>${employeeName}</strong></p>
       <table>

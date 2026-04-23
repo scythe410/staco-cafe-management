@@ -1,4 +1,4 @@
-# Staco Cafe Management — Design System
+# Stacko Cafe Management — Design System
 
 ## Viewport & Layout
 - **Primary breakpoint:** 1024px (tablet landscape)

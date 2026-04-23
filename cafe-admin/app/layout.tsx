@@ -8,8 +8,8 @@ import { Analytics } from "@vercel/analytics/next";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Staco Cafe Management",
-  description: "Tablet-optimised admin portal for Staco Cafe",
+  title: "Stacko Cafe Management",
+  description: "Tablet-optimised admin portal for Stacko Cafe",
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },

@@ -72,7 +72,7 @@ export function printReport(title: string, bodyHtml: string) {
   @media print { body { padding: 20px; } .no-print { display: none; } }
 </style></head><body>
 ${bodyHtml}
-<p class="footer">Staco Cafe — Generated on ${formatDate(new Date())}</p>
+<p class="footer">Stacko Cafe — Generated on ${formatDate(new Date())}</p>
 </body></html>`)
   w.document.close()
   w.print()

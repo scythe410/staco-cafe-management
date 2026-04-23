@@ -107,7 +107,7 @@ export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = fals
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-5xl w-[96vw] max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-4xl w-[96vw] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Order Details</DialogTitle>
         </DialogHeader>

@@ -137,7 +137,7 @@
 - [x] UI aesthetics overhaul — improved styling and visual consistency
 - [x] Cafe logos added — `public/logos/logo-owl.png`, `public/logos/logo-text.png`, `public/logos/neuralshift-logo.png`
 - [x] Login page redesign — logo-text image replaces text heading, "Powered by NeuralShift" footer added
-- [x] Sidebar branding — owl logo icon added next to "Staco Cafe" title
+- [x] Sidebar branding — owl logo icon added next to "Stacko Cafe" title
 - [x] Favicon & PWA setup — custom favicon (16x16, 32x32), apple-touch-icon (192x192, 512x512), `site.webmanifest`
 - [x] Metadata updated in `app/layout.tsx` — proper favicon references and web manifest
 - [x] Old root-level logo files removed (`cafe-admin/logo-owl.png`, `cafe-admin/logo-text.png`) — assets moved to `public/logos/`
@@ -191,11 +191,11 @@
 ### ✅ Phase 9 — Print Bill Feature (COMPLETE)
 - [x] Order bill receipt component — `components/orders/order-bill.tsx`
   - `getBillHtml()` generates full receipt HTML with inline SVGs
-  - `getOrderPrintTitle()` returns `Staco-Cafe-Bill-{id}-{date}` for PDF filename
+  - `getOrderPrintTitle()` returns `Stacko-Cafe-Bill-{id}-{date}` for PDF filename
   - `BILL_STYLES` CSS string with 80mm thermal receipt layout
-  - Inline Staco owl SVG (monochrome, stroke-only, waffle body + coffee cup wing)
+  - Inline Stacko owl SVG (monochrome, stroke-only, waffle body + coffee cup wing)
   - Inline NeuralShift SVG (triangle neural network mark)
-  - Bill header: owl logo, "Staco Cafe", tagline
+  - Bill header: owl logo, "Stacko Cafe", tagline
   - Meta: bill number (#STC-{id}), date, time, order type, customer
   - Items: full names with word-break wrapping, qty, LKR price with comma formatting
   - Totals: subtotal, discount/tax/commission (conditional), bold TOTAL
@@ -204,7 +204,7 @@
   - Opens `_blank` popup with only the bill HTML + styles
   - Auto-prints on load, auto-closes after print dialog
   - Main app completely unaffected — no sidebar/nav/dialog prints
-  - PDF filename derived from `<title>`: `Staco-Cafe-Bill-{last8}-{yyyy-mm-dd}.pdf`
+  - PDF filename derived from `<title>`: `Stacko-Cafe-Bill-{last8}-{yyyy-mm-dd}.pdf`
 - [x] Print Bill button in order detail dialog
   - Visible to owner, manager, cashier roles only
   - Hidden from kitchen and inventory roles

@@ -1,4 +1,4 @@
-# Staco Cafe Management — Full System Documentation
+# Stacko Cafe Management — Full System Documentation
 
 ## Table of Contents
 1. [System Overview](#system-overview)

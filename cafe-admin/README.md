@@ -1,8 +1,8 @@
-# Staco Cafe Management
+# Stacko Cafe Management
 
 Tablet-optimised admin web app for managing cafe operations — finances, inventory, orders, employees, and reports.
 
-Built for [Staco Cafe](https://staco.lk) | Powered by [NeuralShift](https://neuralshift.dev)
+Built for [Stacko Cafe](https://staco.lk) | Powered by [NeuralShift](https://neuralshift.dev)
 
 ## Tech stack
 
@@ -87,7 +87,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Branding
 
-- Login page displays the Staco Cafe logo and NeuralShift attribution
+- Login page displays the Stacko Cafe logo and NeuralShift attribution
 - Sidebar includes the owl logo icon
 - Custom favicon and PWA manifest with app icons (16x16, 32x32, 192x192, 512x512)
 - Logo assets stored in `public/logos/`

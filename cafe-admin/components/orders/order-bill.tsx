@@ -46,7 +46,7 @@ export function getBillHtml(order: OrderDetail): string {
   return `
     <!-- Header -->
     <div class="header">
-      <img src="${origin}/logos/logo-text.png" alt="Staco Cafe" class="logo-main" />
+      <img src="${origin}/logos/logo-text.png" alt="Stacko Cafe" class="logo-main" />
       <p class="tagline">Come for the treats, you'll stay for the feeling.</p>
     </div>
 
@@ -101,7 +101,7 @@ export function getBillHtml(order: OrderDetail): string {
 
     <!-- Thank you -->
     <div class="thank-you">
-      <p class="thank-you-title">Thank you for visiting Staco Cafe!</p>
+      <p class="thank-you-title">Thank you for visiting Stacko Cafe!</p>
       <p class="thank-you-sub">Please come again.</p>
     </div>
 
@@ -118,7 +118,7 @@ export function getBillHtml(order: OrderDetail): string {
 export function getOrderPrintTitle(order: OrderDetail): string {
   const orderIdShort = order.id.slice(-8)
   const formattedDate = format(new Date(order.created_at), 'yyyy-MM-dd')
-  return `Staco-Cafe-Bill-${orderIdShort}-${formattedDate}`
+  return `Stacko-Cafe-Bill-${orderIdShort}-${formattedDate}`
 }
 
 export const BILL_STYLES = `
