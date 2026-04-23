@@ -30,7 +30,7 @@
 -- mi_1..5   c1eebc99-9c0b-4ef8-bb6d-6bb9bd380c01..05
 
 -- Ingredients
--- ing_1..10 d1eebc99-9c0b-4ef8-bb6d-6bb9bd380d01..10
+-- ing_1..27 d1eebc99-9c0b-4ef8-bb6d-6bb9bd380d01..27
 
 -- Employees
 -- emp_1..3  e1eebc99-9c0b-4ef8-bb6d-6bb9bd380e01..03
@@ -202,120 +202,308 @@ on conflict (id) do nothing;
 
 -- ================================================================
 -- SECTION 4: INGREDIENTS (10 items)
--- Quantities in natural units; cost_price in cents per unit
--- One item deliberately below min_stock_level to demo low-stock alert
+-- Quantities in natural units; cost_price in cents per pack/unit as listed
+-- Real inventory from cafe CSV — 27 items
+-- supplier_id set to null (Phase 2 supplier management)
 -- ================================================================
 insert into ingredients (
   id, name, category, unit, quantity, min_stock_level, cost_price, supplier_id, expiry_date
 ) values
 (
   'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d01',
-  'Coffee Beans',
+  'Milk (900 ml)',
   'Beverages',
-  'kg',
-  4.5,
-  3.0,
-  250000,   -- LKR 2,500 per kg
-  'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b03',
-  (current_date + interval '180 days')::date
+  'pack',
+  40.0,
+  20.0,
+  44000,    -- LKR 440 per pack
+  null,
+  null
 ),
 (
   'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d02',
-  'Fresh Milk',
-  'Beverages',
-  'litre',
-  18.0,
-  10.0,
-  42000,    -- LKR 420 per litre
-  'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b03',
-  (current_date + interval '5 days')::date
+  'Nutella (750 g)',
+  'Spreads & Sauces',
+  'jar',
+  1.0,
+  1.0,
+  485000,   -- LKR 4,850 per jar
+  null,
+  null
 ),
 (
   'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d03',
-  'Ceylon Tea Leaves',
+  'Nescafe Classic (200 g x2)',
   'Beverages',
-  'kg',
-  0.8,      -- below min_stock_level → triggers low-stock alert on insert
-  1.5,
-  180000,   -- LKR 1,800 per kg
-  'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b03',
-  (current_date + interval '365 days')::date
+  'pack',
+  1.0,
+  1.0,
+  472500,   -- LKR 4,725 per pack of 2
+  null,
+  null
 ),
 (
   'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d04',
-  'White Rice',
-  'Dry Goods',
+  'Coffee Beans (1 kg)',
+  'Beverages',
   'kg',
-  48.0,
-  20.0,
-  22000,    -- LKR 220 per kg
-  'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b02',
+  1.0,
+  1.0,
+  950000,   -- LKR 9,500 per kg
+  null,
   null
 ),
 (
   'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d05',
-  'Chicken Breast',
-  'Protein',
-  'kg',
-  12.5,
-  8.0,
-  160000,   -- LKR 1,600 per kg
-  'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b01',
-  (current_date + interval '3 days')::date
+  'Local Coffee (200 g)',
+  'Beverages',
+  'pack',
+  1.0,
+  5.0,      -- min 5 kg worth → low stock alert
+  150000,   -- LKR 1,500 per 200 g pack
+  null,
+  null
 ),
 (
   'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d06',
-  'Sandwich Bread',
-  'Bakery',
-  'loaf',
-  9.0,
-  4.0,
-  25000,    -- LKR 250 per loaf
-  'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b01',
-  (current_date + interval '4 days')::date
+  'Wafer Rolls (10 packs)',
+  'Snacks',
+  'pack',
+  10.0,
+  5.0,
+  12000,    -- LKR 120 per pack
+  null,
+  null
 ),
 (
   'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d07',
-  'Eggs',
-  'Protein',
-  'piece',
-  72.0,
-  24.0,
-  6500,     -- LKR 65 per egg
-  'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b01',
-  (current_date + interval '14 days')::date
+  'Peanut Butter (340 g x5)',
+  'Spreads & Sauces',
+  'pack',
+  1.0,
+  1.0,
+  380000,   -- LKR 3,800 per pack of 5
+  null,
+  null
 ),
 (
   'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d08',
-  'Coconut Oil',
-  'Dry Goods',
-  'litre',
-  8.0,
-  4.0,
-  95000,    -- LKR 950 per litre
-  'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b02',
-  (current_date + interval '365 days')::date
+  'Tomato Sauce (4 L x2)',
+  'Spreads & Sauces',
+  'pack',
+  1.0,
+  1.0,
+  250000,   -- LKR 2,500 per pack of 2
+  null,
+  null
 ),
 (
   'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d09',
-  'Mixed Vegetables',
-  'Produce',
-  'kg',
-  15.0,
-  6.0,
-  55000,    -- LKR 550 per kg
-  'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b01',
-  (current_date + interval '4 days')::date
+  'Mayonnaise (3.78 L)',
+  'Spreads & Sauces',
+  'bottle',
+  1.0,
+  1.0,
+  550000,   -- LKR 5,500 per bottle
+  null,
+  null
 ),
 (
   'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d10',
-  'White Sugar',
-  'Dry Goods',
+  'Vanilla Essence (500 ml)',
+  'Baking',
+  'bottle',
+  1.0,
+  1.0,
+  225000,   -- LKR 2,250 per bottle
+  null,
+  null
+),
+(
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d11',
+  'Flour (1 kg x8)',
+  'Baking',
+  'pack',
+  1.0,
+  1.0,
+  32500,    -- LKR 325 per pack of 8 kg
+  null,
+  null
+),
+(
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d12',
+  'Soda 500 ml',
+  'Beverages',
+  'bottle',
+  36.0,
+  12.0,
+  11200,    -- LKR 112 per bottle
+  null,
+  null
+),
+(
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d13',
+  'Soda 1.5 L',
+  'Beverages',
+  'bottle',
+  25.0,
+  10.0,
+  23300,    -- LKR 233 per bottle
+  null,
+  null
+),
+(
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d14',
+  'Hersheys Syrup (623 ml)',
+  'Syrups & Toppings',
+  'bottle',
+  2.0,
+  1.0,
+  400000,   -- LKR 4,000 per bottle (Chocolate & Strawberry)
+  null,
+  null
+),
+(
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d15',
+  'Monin Dark Chocolate (1.89 L)',
+  'Syrups & Toppings',
+  'bottle',
+  1.0,
+  1.0,
+  1040000,  -- LKR 10,400 per bottle
+  null,
+  null
+),
+(
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d16',
+  'Crackers (500 g x2)',
+  'Snacks',
+  'pack',
+  1.0,
+  1.0,
+  200000,   -- LKR 2,000 per pack
+  null,
+  null
+),
+(
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d17',
+  'Sprinkles (1 kg)',
+  'Syrups & Toppings',
   'kg',
-  14.0,
-  5.0,
-  21000,    -- LKR 210 per kg
-  'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b02',
+  1.0,
+  1.0,
+  250000,   -- LKR 2,500 per kg
+  null,
+  null
+),
+(
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d18',
+  'Almond (1 kg x2)',
+  'Baking',
+  'pack',
+  1.0,
+  1.0,
+  520000,   -- LKR 5,200 per pack of 2 kg
+  null,
+  null
+),
+(
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d19',
+  'Cocoa Powder (1 kg x3)',
+  'Baking',
+  'pack',
+  1.0,
+  1.0,
+  550000,   -- LKR 5,500 per pack of 3 kg
+  null,
+  null
+),
+(
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d20',
+  'Milo (400 g x3)',
+  'Beverages',
+  'pack',
+  1.0,
+  1.0,
+  89000,    -- LKR 890 per pack of 3
+  null,
+  null
+),
+(
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d21',
+  'Marshmallow (250 g / 50 pcs)',
+  'Syrups & Toppings',
+  'pack',
+  1.0,
+  4.0,      -- min 4 packs → low stock alert
+  30000,    -- LKR 300 per pack
+  null,
+  null
+),
+(
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d22',
+  'Lemon Syrup (1 L)',
+  'Syrups & Toppings',
+  'bottle',
+  1.0,
+  1.0,
+  700000,   -- LKR 7,000 per bottle
+  null,
+  null
+),
+(
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d23',
+  'Syrup (750 ml)',
+  'Syrups & Toppings',
+  'bottle',
+  1.0,
+  1.0,
+  500000,   -- LKR 5,000 per bottle
+  null,
+  null
+),
+(
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d24',
+  'Mint Syrup (750 ml)',
+  'Syrups & Toppings',
+  'bottle',
+  1.0,
+  1.0,
+  265000,   -- LKR 2,650 per bottle
+  null,
+  null
+),
+(
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d25',
+  'Raspberry Syrup (750 ml)',
+  'Syrups & Toppings',
+  'bottle',
+  1.0,
+  1.0,
+  265000,   -- LKR 2,650 per bottle
+  null,
+  null
+),
+(
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d26',
+  'Mozzarella Cheese (2 kg)',
+  'Dairy',
+  'pack',
+  1.0,
+  1.0,
+  1000000,  -- LKR 10,000 per 2 kg pack
+  null,
+  null
+),
+(
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380d27',
+  'Cornflakes (1 kg)',
+  'Snacks',
+  'kg',
+  1.0,
+  1.0,
+  300000,   -- LKR 3,000 per kg
+  null,
   null
 )
 on conflict (id) do nothing;

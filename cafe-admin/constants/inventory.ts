@@ -1,11 +1,10 @@
 export const INGREDIENT_CATEGORIES = [
   'Beverages',
-  'Dry Goods',
-  'Protein',
-  'Produce',
-  'Bakery',
+  'Baking',
   'Dairy',
-  'Spices',
+  'Snacks',
+  'Spreads & Sauces',
+  'Syrups & Toppings',
   'Other',
 ] as const
 
@@ -17,9 +16,9 @@ export const INGREDIENT_UNITS = [
   'litre',
   'ml',
   'piece',
-  'loaf',
   'pack',
   'bottle',
+  'jar',
   'box',
 ] as const
 
