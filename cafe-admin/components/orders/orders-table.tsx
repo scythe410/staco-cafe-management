@@ -226,6 +226,7 @@ export function OrdersTable({ userRole }: OrdersTableProps) {
         open={!!selectedOrderId}
         onOpenChange={(open) => { if (!open) setSelectedOrderId(null) }}
         readOnly={isReadOnly}
+        userRole={userRole}
       />
     </div>
   )

@@ -188,6 +188,33 @@
 - [x] Profit card shows negative values in red, positive in green
 - [x] Month comparison handles zero previous month (shows null/no growth, not Infinity/NaN)
 
+### ✅ Phase 9 — Print Bill Feature (COMPLETE)
+- [x] Order bill receipt component — `components/orders/order-bill.tsx`
+  - `getBillHtml()` generates full receipt HTML with inline SVGs
+  - `getOrderPrintTitle()` returns `Staco-Cafe-Bill-{id}-{date}` for PDF filename
+  - `BILL_STYLES` CSS string with 80mm thermal receipt layout
+  - Inline Staco owl SVG (monochrome, stroke-only, waffle body + coffee cup wing)
+  - Inline NeuralShift SVG (triangle neural network mark)
+  - Bill header: owl logo, "Staco Cafe", tagline
+  - Meta: bill number (#STC-{id}), date, time, order type, customer
+  - Items: full names with word-break wrapping, qty, LKR price with comma formatting
+  - Totals: subtotal, discount/tax/commission (conditional), bold TOTAL
+  - Footer: payment method, thank you message, NeuralShift powered-by
+- [x] Print via isolated popup window (not window.print on main page)
+  - Opens `_blank` popup with only the bill HTML + styles
+  - Auto-prints on load, auto-closes after print dialog
+  - Main app completely unaffected — no sidebar/nav/dialog prints
+  - PDF filename derived from `<title>`: `Staco-Cafe-Bill-{last8}-{yyyy-mm-dd}.pdf`
+- [x] Print Bill button in order detail dialog
+  - Visible to owner, manager, cashier roles only
+  - Hidden from kitchen and inventory roles
+- [x] Order detail dialog fixes
+  - Source and payment method labels display full text (no truncation)
+  - Item names display fully with word-wrap (no text-overflow ellipsis)
+  - Price columns use `whitespace-nowrap` to prevent LKR wrapping
+  - Grid columns have proper gap spacing
+- [x] TypeScript check — zero errors
+
 ## Known issues / blockers
 - None
 

@@ -16,8 +16,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Printer } from 'lucide-react'
 import { useOrderDetail, useUpdateOrderStatus } from '@/hooks/useOrders'
-import { formatCurrency, formatDate } from '@/lib/utils'
+import { formatCurrency } from '@/lib/utils'
 import {
   ORDER_STATUS,
   ORDER_STATUS_LABELS,
@@ -35,15 +36,18 @@ import {
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { MENU_CATEGORY_LABELS, CATEGORY_BADGE_STYLES } from '@/constants/menu'
+import { ROLES, type Role } from '@/constants/roles'
+import { getBillHtml, getOrderPrintTitle, BILL_STYLES } from './order-bill'
 
 interface OrderDetailDialogProps {
   orderId: string | null
   open: boolean
   onOpenChange: (open: boolean) => void
   readOnly?: boolean
+  userRole?: Role
 }
 
-export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = false }: OrderDetailDialogProps) {
+export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = false, userRole }: OrderDetailDialogProps) {
   const { data: order, isLoading } = useOrderDetail(orderId)
   const updateStatus = useUpdateOrderStatus()
 
@@ -62,6 +66,37 @@ export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = fals
     )
   }
 
+  function handlePrintBill() {
+    if (!order) return
+
+    const billContent = getBillHtml(order)
+    const title = getOrderPrintTitle(order)
+
+    const printWindow = window.open('', '_blank', 'width=400,height=700')
+    if (!printWindow) return
+
+    printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>${title}</title>
+  <style>${BILL_STYLES}</style>
+</head>
+<body>
+  ${billContent}
+  <script>
+    window.onload = function() {
+      window.print();
+      window.onafterprint = function() { window.close(); };
+    };
+  </script>
+</body>
+</html>`)
+    printWindow.document.close()
+  }
+
+  const canPrint = userRole === ROLES.OWNER || userRole === ROLES.MANAGER || userRole === ROLES.CASHIER
+
   const hasCommission = order && COMMISSION_SOURCES.includes(order.source as OrderSource)
   const nextLabel = order ? NEXT_STATUS_LABEL[order.status as OrderStatus] : null
   const isFinal = order && (
@@ -72,7 +107,7 @@ export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = fals
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-5xl w-[96vw] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Order Details</DialogTitle>
         </DialogHeader>
@@ -86,10 +121,10 @@ export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = fals
         ) : (
           <div className="space-y-5">
             {/* Header info */}
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
               <div>
                 <span className="text-muted-foreground">Order ID</span>
-                <p className="font-mono text-xs mt-0.5">{order.id.slice(0, 8)}...</p>
+                <p className="font-mono text-xs mt-0.5 truncate">{order.id.slice(0, 8)}...</p>
               </div>
               <div>
                 <span className="text-muted-foreground">Customer</span>
@@ -98,7 +133,7 @@ export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = fals
               <div>
                 <span className="text-muted-foreground">Source</span>
                 <p className="mt-1">
-                  <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium', ORDER_SOURCE_COLORS[order.source as OrderSource])}>
+                  <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap', ORDER_SOURCE_COLORS[order.source as OrderSource])}>
                     {ORDER_SOURCE_LABELS[order.source as OrderSource]}
                   </span>
                 </p>
@@ -113,7 +148,7 @@ export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = fals
               </div>
               <div>
                 <span className="text-muted-foreground">Payment</span>
-                <p className="mt-0.5 capitalize">
+                <p className="mt-0.5 whitespace-nowrap">
                   {order.payment_method
                     ? PAYMENT_METHOD_LABELS[order.payment_method as PaymentMethod]
                     : '—'}
@@ -130,7 +165,7 @@ export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = fals
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Item</TableHead>
+                    <TableHead className="min-w-[180px]">Item</TableHead>
                     <TableHead className="text-right">Qty</TableHead>
                     <TableHead className="text-right">Price</TableHead>
                     <TableHead className="text-right">Subtotal</TableHead>
@@ -140,8 +175,8 @@ export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = fals
                   {order.order_items.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          {item.menu_items?.name ?? 'Unknown item'}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="break-words">{item.menu_items?.name ?? 'Unknown item'}</span>
                           {item.menu_items?.category && (
                             <span className={cn(
                               'inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium shrink-0',
@@ -153,8 +188,8 @@ export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = fals
                         </div>
                       </TableCell>
                       <TableCell className="text-right">{item.quantity}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.unit_price)}</TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right whitespace-nowrap">{formatCurrency(item.unit_price)}</TableCell>
+                      <TableCell className="text-right whitespace-nowrap">
                         {formatCurrency(item.unit_price * item.quantity)}
                       </TableCell>
                     </TableRow>
@@ -198,27 +233,39 @@ export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = fals
             </div>
 
             {/* Actions */}
-            {!isFinal && !readOnly && (
-              <div className="flex gap-2 pt-2">
-                {nextLabel && (
+            <div className="flex gap-2 pt-2">
+              {!isFinal && !readOnly && (
+                <>
+                  {nextLabel && (
+                    <Button
+                      className="flex-1 h-11"
+                      onClick={handleAdvance}
+                      disabled={updateStatus.isPending}
+                    >
+                      {updateStatus.isPending ? 'Updating...' : nextLabel}
+                    </Button>
+                  )}
                   <Button
-                    className="flex-1 h-11"
-                    onClick={handleAdvance}
+                    variant="destructive"
+                    className="h-11"
+                    onClick={handleCancel}
                     disabled={updateStatus.isPending}
                   >
-                    {updateStatus.isPending ? 'Updating...' : nextLabel}
+                    Cancel Order
                   </Button>
-                )}
+                </>
+              )}
+              {canPrint && (
                 <Button
-                  variant="destructive"
+                  variant="outline"
                   className="h-11"
-                  onClick={handleCancel}
-                  disabled={updateStatus.isPending}
+                  onClick={handlePrintBill}
                 >
-                  Cancel Order
+                  <Printer className="h-4 w-4 mr-2" />
+                  Print Bill
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </DialogContent>
