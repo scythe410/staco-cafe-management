@@ -37,10 +37,16 @@ import {
 import { AddOrderDialog } from './add-order-dialog'
 import { OrderDetailDialog } from './order-detail-dialog'
 import { format } from 'date-fns'
+import { ROLES, type Role } from '@/constants/roles'
 
 const ALL = 'all'
 
-export function OrdersTable() {
+interface OrdersTableProps {
+  userRole?: Role
+}
+
+export function OrdersTable({ userRole }: OrdersTableProps) {
+  const isReadOnly = userRole === ROLES.KITCHEN
   const [filters, setFilters] = useState<OrderFilters>({})
   const [search, setSearch] = useState('')
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
@@ -70,7 +76,7 @@ export function OrdersTable() {
               className="pl-9 h-11"
             />
           </div>
-          <AddOrderDialog />
+          {!isReadOnly && <AddOrderDialog />}
         </div>
 
         {/* Filters row */}
@@ -219,6 +225,7 @@ export function OrdersTable() {
         orderId={selectedOrderId}
         open={!!selectedOrderId}
         onOpenChange={(open) => { if (!open) setSelectedOrderId(null) }}
+        readOnly={isReadOnly}
       />
     </div>
   )

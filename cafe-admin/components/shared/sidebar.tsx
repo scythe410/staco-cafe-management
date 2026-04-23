@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 import { NAV_ITEMS } from '@/constants/navigation'
 import { createBrowserClient } from '@/lib/supabase'
 import { useLowStockCount } from '@/hooks/useInventory'
-import type { Role } from '@/constants/roles'
+import { ROLES, ROLE_ALLOWED_ROUTES, type Role } from '@/constants/roles'
 
 interface SidebarProps {
   userName: string
@@ -42,7 +42,11 @@ export function Sidebar({ userName, userRole }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.filter((item) => {
+          if (userRole === ROLES.OWNER) return true
+          const allowed = ROLE_ALLOWED_ROUTES[userRole] ?? []
+          return allowed.some((prefix) => item.href.startsWith(prefix))
+        }).map((item) => {
           const isActive =
             pathname === item.href || pathname.startsWith(item.href + '/')
           return (

@@ -25,7 +25,7 @@ export function ProtectedShell({ userName, userRole, children }: ProtectedShellP
         <div className="p-6">{children}</div>
       </main>
 
-      <BottomNav />
+      <BottomNav userRole={userRole} />
     </div>
   )
 }

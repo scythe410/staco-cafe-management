@@ -40,9 +40,10 @@ interface OrderDetailDialogProps {
   orderId: string | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  readOnly?: boolean
 }
 
-export function OrderDetailDialog({ orderId, open, onOpenChange }: OrderDetailDialogProps) {
+export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = false }: OrderDetailDialogProps) {
   const { data: order, isLoading } = useOrderDetail(orderId)
   const updateStatus = useUpdateOrderStatus()
 
@@ -197,7 +198,7 @@ export function OrderDetailDialog({ orderId, open, onOpenChange }: OrderDetailDi
             </div>
 
             {/* Actions */}
-            {!isFinal && (
+            {!isFinal && !readOnly && (
               <div className="flex gap-2 pt-2">
                 {nextLabel && (
                   <Button

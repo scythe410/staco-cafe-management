@@ -5,15 +5,26 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { NAV_ITEMS } from '@/constants/navigation'
 import { useLowStockCount } from '@/hooks/useInventory'
+import { ROLES, ROLE_ALLOWED_ROUTES, type Role } from '@/constants/roles'
 
-export function BottomNav() {
+interface BottomNavProps {
+  userRole: Role
+}
+
+export function BottomNav({ userRole }: BottomNavProps) {
   const pathname = usePathname()
   const { data: lowStockCount } = useLowStockCount()
+
+  const visibleItems = NAV_ITEMS.filter((item) => {
+    if (userRole === ROLES.OWNER) return true
+    const allowed = ROLE_ALLOWED_ROUTES[userRole] ?? []
+    return allowed.some((prefix) => item.href.startsWith(prefix))
+  })
 
   return (
     <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 border-t bg-background">
       <div className="flex items-center justify-around h-16">
-        {NAV_ITEMS.map((item) => {
+        {visibleItems.map((item) => {
           const isActive =
             pathname === item.href || pathname.startsWith(item.href + '/')
           return (

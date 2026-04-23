@@ -39,6 +39,11 @@ export async function proxy(request: NextRequest) {
   // Fetch role from user metadata (set during sign-up / admin seed)
   const role = (user.user_metadata?.role ?? user.app_metadata?.role ?? '') as Role
 
+  // Redirect root to dashboard for all authenticated users
+  if (pathname === '/') {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
   // Owner has unrestricted access
   if (role === ROLES.OWNER) return response
 

@@ -162,6 +162,32 @@
 - [x] No hardcoded prices or menu item names anywhere — all from database via formatCurrency()
 - [x] TypeScript check — zero errors
 
+### ✅ Phase 8 — MVP 1 QA Pass (COMPLETE)
+- [x] Role-based nav filtering — sidebar and bottom-nav now only show links the user's role can access
+  - Owner sees all 6 modules
+  - Manager sees Dashboard, Finance, Inventory, Orders, Employees, Reports
+  - Cashier sees Dashboard, Orders only
+  - Inventory sees Dashboard, Inventory only
+  - Kitchen sees Dashboard, Orders only
+- [x] Kitchen role fix — allowed route changed from `/orders/kitchen` (non-existent) to `/orders`
+- [x] Kitchen read-only orders — orders page hides "New Order" button, order detail hides status change/cancel buttons
+- [x] Root redirect — authenticated users visiting `/` now redirect to `/dashboard` (was showing 404 for owner)
+- [x] BottomNav now receives `userRole` prop for role-based filtering
+- [x] TypeScript check — zero errors
+- [x] Production build — passes clean, zero warnings
+- [x] No console.log statements in production code
+- [x] No TODO/FIXME comments remaining
+- [x] .env.local in .gitignore, only .env.local.example committed
+- [x] Only Supabase anon key used client-side (no service role key)
+- [x] All forms disable submit button while pending (double-click prevention)
+- [x] All currency values use formatCurrency() — no raw cents displayed
+- [x] All dates use formatDate() or date-fns format() — no raw ISO strings
+- [x] All tables have empty state messages
+- [x] All data-loading states show skeletons
+- [x] All error states handled explicitly with user-friendly messages
+- [x] Profit card shows negative values in red, positive in green
+- [x] Month comparison handles zero previous month (shows null/no growth, not Infinity/NaN)
+
 ## Known issues / blockers
 - None
 
