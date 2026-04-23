@@ -1,7 +1,10 @@
 import { useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createBrowserClient } from '@/lib/supabase'
+import { ensureFreshSession } from '@/lib/auth'
+import { broadcastInvalidate } from '@/hooks/useCrossTabSync'
 import { toast } from 'sonner'
+import { escapeLikePattern } from '@/lib/utils'
 import type { Order, OrderItem, MenuItem } from '@/lib/types'
 import type { OrderStatus, OrderSource, PaymentMethod } from '@/constants/orders'
 import { ORDER_STATUS } from '@/constants/orders'
@@ -84,9 +87,10 @@ export function useOrders(filters: OrderFilters = {}) {
         query = query.lt('created_at', nextDay.toISOString())
       }
       if (filters.search?.trim()) {
-        const term = filters.search.trim().replace(/[,().*]/g, '')
+        const term = filters.search.trim()
         if (term) {
-          query = query.or(`id.eq.${term},customer_name.ilike.%${term}%`)
+          const escaped = escapeLikePattern(term)
+          query = query.or(`id.ilike.%${escaped}%,customer_name.ilike.%${escaped}%`)
         }
       }
 
@@ -125,6 +129,9 @@ export function useUpdateOrderStatus() {
 
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: OrderStatus }) => {
+      const ok = await ensureFreshSession()
+      if (!ok) throw new Error('Your session has expired. Please sign in again.')
+
       const updates: Record<string, unknown> = { status }
       if (status === ORDER_STATUS.COMPLETED) {
         updates.completed_at = new Date().toISOString()
@@ -143,6 +150,8 @@ export function useUpdateOrderStatus() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      broadcastInvalidate(['orders'])
+      broadcastInvalidate(['dashboard'])
       toast.success('Order status updated')
     },
     onError: (error) => {
@@ -188,6 +197,9 @@ export function useCreateOrder() {
 
   return useMutation({
     mutationFn: async (input: CreateOrderInput) => {
+      const ok = await ensureFreshSession()
+      if (!ok) throw new Error('Your session has expired. Please sign in again.')
+
       const subtotal = input.items.reduce(
         (sum, item) => sum + item.unit_price * item.quantity,
         0,
@@ -215,6 +227,8 @@ export function useCreateOrder() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      broadcastInvalidate(['orders'])
+      broadcastInvalidate(['dashboard'])
       toast.success('Order created')
     },
     onError: (error) => {

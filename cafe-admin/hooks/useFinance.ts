@@ -1,7 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createBrowserClient } from '@/lib/supabase'
-import { startOfDay, startOfWeek, startOfMonth, subMonths, endOfMonth, format } from 'date-fns'
+import { ensureFreshSession } from '@/lib/auth'
+import { broadcastInvalidate } from '@/hooks/useCrossTabSync'
+import { format } from 'date-fns'
 import { toast } from 'sonner'
+import {
+  startOfTodaySL,
+  startOfTomorrowSL,
+  startOfDaysAgoSL,
+  startOfMonthSL,
+  startOfPreviousMonthSL,
+  startOfDateSL,
+  toSLDateString,
+} from '@/lib/utils'
 import type { Expense } from '@/lib/types'
 import { ORDER_STATUS } from '@/constants/orders'
 import type { ExpenseCategory } from '@/constants/expenses'
@@ -17,16 +28,15 @@ export interface DateRange {
 }
 
 export function getPresetRange(preset: DatePreset): DateRange {
-  const now = new Date()
   switch (preset) {
     case 'today':
-      return { from: startOfDay(now).toISOString(), to: now.toISOString() }
+      return { from: startOfTodaySL(), to: startOfTomorrowSL() }
     case 'this_week':
-      return { from: startOfWeek(now, { weekStartsOn: 1 }).toISOString(), to: now.toISOString() }
+      return { from: startOfDaysAgoSL(6), to: startOfTomorrowSL() }
     case 'this_month':
-      return { from: startOfMonth(now).toISOString(), to: now.toISOString() }
+      return { from: startOfMonthSL(), to: startOfTomorrowSL() }
     case 'custom':
-      return { from: startOfMonth(now).toISOString(), to: now.toISOString() }
+      return { from: startOfMonthSL(), to: startOfTomorrowSL() }
   }
 }
 
@@ -48,7 +58,7 @@ export function useFinanceSummary(range: DateRange) {
         .select('total_amount, discount, tax')
         .eq('status', ORDER_STATUS.COMPLETED)
         .gte('created_at', range.from)
-        .lte('created_at', range.to)
+        .lt('created_at', range.to)
 
       if (ordersErr) throw ordersErr
 
@@ -58,11 +68,13 @@ export function useFinanceSummary(range: DateRange) {
       const totalOrders = orders?.length ?? 0
 
       // Total expenses
+      const fromDate = toSLDateString(range.from)
+      const toDate = toSLDateString(range.to)
       const { data: expenses, error: expErr } = await supabase
         .from('expenses')
         .select('amount')
-        .gte('date', range.from.slice(0, 10))
-        .lte('date', range.to.slice(0, 10))
+        .gte('date', fromDate)
+        .lte('date', toDate)
 
       if (expErr) throw expErr
 
@@ -93,7 +105,7 @@ export function useRevenueByDay(range: DateRange) {
         .select('total_amount, discount, tax, created_at')
         .eq('status', ORDER_STATUS.COMPLETED)
         .gte('created_at', range.from)
-        .lte('created_at', range.to)
+        .lt('created_at', range.to)
 
       if (error) throw error
 
@@ -135,7 +147,7 @@ export function usePaymentMethodSplit(range: DateRange) {
         .select('payment_method, total_amount')
         .eq('status', ORDER_STATUS.COMPLETED)
         .gte('created_at', range.from)
-        .lte('created_at', range.to)
+        .lt('created_at', range.to)
 
       if (error) throw error
 
@@ -168,11 +180,10 @@ export function useMonthComparison() {
   return useQuery({
     queryKey: ['finance', 'monthComparison'],
     queryFn: async () => {
-      const now = new Date()
-      const curStart = startOfMonth(now).toISOString()
-      const curEnd = now.toISOString()
-      const prevStart = startOfMonth(subMonths(now, 1)).toISOString()
-      const prevEnd = endOfMonth(subMonths(now, 1)).toISOString()
+      const curStart = startOfMonthSL()
+      const curEnd = startOfTomorrowSL()
+      const prevStart = startOfPreviousMonthSL()
+      const prevEnd = curStart // previous month ends where current starts
 
       // Current month orders
       const { data: curOrders, error: e1 } = await supabase
@@ -180,7 +191,7 @@ export function useMonthComparison() {
         .select('total_amount, discount, tax')
         .eq('status', ORDER_STATUS.COMPLETED)
         .gte('created_at', curStart)
-        .lte('created_at', curEnd)
+        .lt('created_at', curEnd)
       if (e1) throw e1
 
       // Previous month orders
@@ -189,23 +200,29 @@ export function useMonthComparison() {
         .select('total_amount, discount, tax')
         .eq('status', ORDER_STATUS.COMPLETED)
         .gte('created_at', prevStart)
-        .lte('created_at', prevEnd)
+        .lt('created_at', prevEnd)
       if (e2) throw e2
 
       // Current month expenses
+      const curStartDate = toSLDateString(curStart)
+      const curEndDate = toSLDateString(new Date().toISOString())
       const { data: curExp, error: e3 } = await supabase
         .from('expenses')
         .select('amount')
-        .gte('date', curStart.slice(0, 10))
-        .lte('date', curEnd.slice(0, 10))
+        .gte('date', curStartDate)
+        .lte('date', curEndDate)
       if (e3) throw e3
 
       // Previous month expenses
+      const prevStartDate = toSLDateString(prevStart)
+      // Last day of prev month = day before current month start
+      const prevEndMs = new Date(curStart).getTime() - 1
+      const prevEndDate = toSLDateString(new Date(prevEndMs).toISOString())
       const { data: prevExp, error: e4 } = await supabase
         .from('expenses')
         .select('amount')
-        .gte('date', prevStart.slice(0, 10))
-        .lte('date', prevEnd.slice(0, 10))
+        .gte('date', prevStartDate)
+        .lte('date', prevEndDate)
       if (e4) throw e4
 
       const currentIncome = (curOrders ?? []).reduce((s, o) => s + o.total_amount - o.discount + o.tax, 0)
@@ -276,11 +293,13 @@ export function useExpenseBreakdown(range: DateRange) {
   return useQuery({
     queryKey: ['finance', 'expenseBreakdown', range],
     queryFn: async () => {
+      const bkFromDate = toSLDateString(range.from)
+      const bkToDate = toSLDateString(range.to)
       const { data, error } = await supabase
         .from('expenses')
         .select('category, amount')
-        .gte('date', range.from.slice(0, 10))
-        .lte('date', range.to.slice(0, 10))
+        .gte('date', bkFromDate)
+        .lte('date', bkToDate)
 
       if (error) throw error
 
@@ -314,6 +333,9 @@ export function useCreateExpense() {
 
   return useMutation({
     mutationFn: async (input: CreateExpenseInput) => {
+      const ok = await ensureFreshSession()
+      if (!ok) throw new Error('Your session has expired. Please sign in again.')
+
       const { data, error } = await supabase
         .from('expenses')
         .insert(input)
@@ -325,6 +347,7 @@ export function useCreateExpense() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['finance'] })
+      broadcastInvalidate(['finance'])
       toast.success('Expense added')
     },
     onError: (error) => {
@@ -358,7 +381,7 @@ export function usePlatformEarnings(range: DateRange) {
         .eq('status', ORDER_STATUS.COMPLETED)
         .in('source', ['pickmefood', 'ubereats'])
         .gte('created_at', range.from)
-        .lte('created_at', range.to)
+        .lt('created_at', range.to)
 
       if (error) throw error
 

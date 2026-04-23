@@ -1,6 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { createBrowserClient } from '@/lib/supabase'
-import { startOfDay, subDays, format } from 'date-fns'
+import { format } from 'date-fns'
+import {
+  startOfTodaySL,
+  startOfTomorrowSL,
+  startOfDaysAgoSL,
+  toSLDateString,
+} from '@/lib/utils'
 import {
   ORDER_STATUS,
   PENDING_STATUSES,
@@ -9,11 +15,6 @@ import {
 } from '@/constants/orders'
 
 const supabase = createBrowserClient()
-
-// ─── Helpers ──────────────────────────────────────────────────────
-function todayISO() {
-  return startOfDay(new Date()).toISOString()
-}
 
 // ─── 1. Today's total sales ──────────────────────────────────────
 export function useTodaySales() {
@@ -24,7 +25,8 @@ export function useTodaySales() {
         .from('orders')
         .select('total_amount')
         .eq('status', ORDER_STATUS.COMPLETED)
-        .gte('created_at', todayISO())
+        .gte('created_at', startOfTodaySL())
+        .lt('created_at', startOfTomorrowSL())
 
       if (error) throw error
 
@@ -52,7 +54,8 @@ export function useTodayOrderCounts() {
       const { data, error } = await supabase
         .from('orders')
         .select('status')
-        .gte('created_at', todayISO())
+        .gte('created_at', startOfTodaySL())
+        .lt('created_at', startOfTomorrowSL())
 
       if (error) throw error
 
@@ -85,15 +88,17 @@ export function useTodayProfitEstimate() {
   return useQuery({
     queryKey: ['dashboard', 'profitEstimate'],
     queryFn: async () => {
-      const today = todayISO()
-      const todayDate = format(new Date(), 'yyyy-MM-dd')
+      const todayStart = startOfTodaySL()
+      const todayEnd = startOfTomorrowSL()
+      const todayDate = toSLDateString(new Date().toISOString())
 
       // Income: sum of completed order totals today
       const { data: orders, error: ordersErr } = await supabase
         .from('orders')
         .select('total_amount')
         .eq('status', ORDER_STATUS.COMPLETED)
-        .gte('created_at', today)
+        .gte('created_at', todayStart)
+        .lt('created_at', todayEnd)
 
       if (ordersErr) throw ordersErr
 
@@ -170,7 +175,8 @@ export function useOrdersBySource() {
       const { data, error } = await supabase
         .from('orders')
         .select('source')
-        .gte('created_at', todayISO())
+        .gte('created_at', startOfTodaySL())
+        .lt('created_at', startOfTomorrowSL())
 
       if (error) throw error
 
@@ -202,26 +208,28 @@ export function useRevenueTrend() {
   return useQuery({
     queryKey: ['dashboard', 'revenueTrend'],
     queryFn: async () => {
-      const now = new Date()
-      const sevenDaysAgo = startOfDay(subDays(now, 6))
+      const sevenDaysAgo = startOfDaysAgoSL(6)
+      const tomorrow = startOfTomorrowSL()
 
       const { data, error } = await supabase
         .from('orders')
         .select('total_amount, created_at')
         .eq('status', ORDER_STATUS.COMPLETED)
-        .gte('created_at', sevenDaysAgo.toISOString())
+        .gte('created_at', sevenDaysAgo)
+        .lt('created_at', tomorrow)
 
       if (error) throw error
 
-      // Bucket by day
+      // Bucket by SL-local day
       const buckets: Record<string, number> = {}
       for (let i = 0; i < 7; i++) {
-        const d = subDays(now, 6 - i)
-        buckets[format(d, 'yyyy-MM-dd')] = 0
+        const dayStart = new Date(startOfDaysAgoSL(6 - i))
+        const key = toSLDateString(dayStart.toISOString())
+        buckets[key] = 0
       }
 
       for (const row of data ?? []) {
-        const dayKey = format(new Date(row.created_at), 'yyyy-MM-dd')
+        const dayKey = toSLDateString(row.created_at)
         if (dayKey in buckets) {
           buckets[dayKey] += row.total_amount ?? 0
         }

@@ -226,6 +226,25 @@
 - [x] TypeScript check — zero errors
 - [x] Migration: `supabase/migrations/006_create_order_rpc.sql` — must be run in Supabase SQL Editor
 
+### ✅ Phase 11 — Tier 2 QA Hardening (COMPLETE)
+- [x] Fix 1: Timezone mismatch — all "today"/"this month" queries now use explicit SL timezone helpers (UTC+5:30) instead of browser-local `startOfDay()`
+  - New helpers in `lib/utils.ts`: `startOfTodaySL`, `startOfTomorrowSL`, `startOfDaysAgoSL`, `startOfMonthSL`, `startOfPreviousMonthSL`, `startOfDateSL`, `toSLDateString`
+  - Updated `hooks/useDashboard.ts` (6 hooks) and `hooks/useFinance.ts` (all date-range queries + month comparison)
+  - Custom date-range picker now converts picked dates to SL-day boundaries
+  - All queries use `.gte` + `.lt` pattern (inclusive lower, exclusive upper)
+- [x] Fix 2: Session token refresh — `ensureFreshSession()` in `lib/auth.ts` called before every mutation (12 mutations across 4 hook files)
+  - Auto-refreshes JWT if < 60 seconds remaining; throws clear error if refresh fails
+  - Login page shows "session expired" message via `?reason=expired` query param
+- [x] Fix 3: SQL wildcard escaping — `escapeLikePattern()` in `lib/utils.ts` escapes `%`, `_`, `\` in user search input
+  - Applied to order search in `hooks/useOrders.ts`
+- [x] Fix 4: Input length limits — `maxLength` attrs + `validateStringLength()` helper in `lib/validation.ts`
+  - customer_name: 60, ingredient name: 80, expense description: 200, employee full_name: 80, contact: 30
+- [x] Fix 5: Cross-tab realtime sync — `hooks/useCrossTabSync.ts` with `BroadcastChannel` API
+  - `useCrossTabSync()` mounted in `ProtectedShell` — listens for invalidation messages from other tabs
+  - `broadcastInvalidate()` called in all mutation onSuccess callbacks (orders, inventory, finance, employees)
+- [x] Fix 6: Clean logout — sidebar sign-out clears React Query cache + forces full page reload to `/auth/login`
+- [x] TypeScript check — zero errors
+
 ## Known issues / blockers
 - None
 

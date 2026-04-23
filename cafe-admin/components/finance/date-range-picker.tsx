@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { startOfDateSL } from '@/lib/utils'
 import type { DatePreset, DateRange } from '@/hooks/useFinance'
 
 interface DateRangePickerProps {
@@ -42,24 +43,30 @@ export function DateRangePicker({
           <Input
             type="date"
             value={customRange.from.slice(0, 10)}
-            onChange={(e) =>
+            onChange={(e) => {
+              if (!e.target.value) return
               onCustomRangeChange({
                 ...customRange,
-                from: new Date(e.target.value).toISOString(),
+                from: startOfDateSL(e.target.value),
               })
-            }
+            }}
             className="w-[150px] h-10"
           />
           <span className="text-sm text-muted-foreground">to</span>
           <Input
             type="date"
             value={customRange.to.slice(0, 10)}
-            onChange={(e) =>
+            onChange={(e) => {
+              if (!e.target.value) return
+              // Upper bound = start of the day AFTER selected end date
+              const [y, m, d] = e.target.value.split('-').map(Number)
+              const nextDay = new Date(Date.UTC(y, m - 1, d + 1))
+              const nextDayStr = `${nextDay.getUTCFullYear()}-${String(nextDay.getUTCMonth() + 1).padStart(2, '0')}-${String(nextDay.getUTCDate()).padStart(2, '0')}`
               onCustomRangeChange({
                 ...customRange,
-                to: new Date(e.target.value + 'T23:59:59').toISOString(),
+                to: startOfDateSL(nextDayStr),
               })
-            }
+            }}
             className="w-[150px] h-10"
           />
         </>

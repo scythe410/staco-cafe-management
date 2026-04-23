@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createBrowserClient } from '@/lib/supabase'
+import { ensureFreshSession } from '@/lib/auth'
+import { broadcastInvalidate } from '@/hooks/useCrossTabSync'
 import { toast } from 'sonner'
 import type { Employee, Salary } from '@/lib/types'
 
@@ -37,6 +39,9 @@ export function useCreateEmployee() {
 
   return useMutation({
     mutationFn: async (input: CreateEmployeeInput) => {
+      const ok = await ensureFreshSession()
+      if (!ok) throw new Error('Your session has expired. Please sign in again.')
+
       const { data, error } = await supabase
         .from('employees')
         .insert(input)
@@ -48,6 +53,7 @@ export function useCreateEmployee() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] })
+      broadcastInvalidate(['employees'])
       toast.success('Employee added')
     },
     onError: (error) => {
@@ -71,6 +77,9 @@ export function useUpdateEmployee() {
 
   return useMutation({
     mutationFn: async ({ id, ...input }: UpdateEmployeeInput) => {
+      const ok = await ensureFreshSession()
+      if (!ok) throw new Error('Your session has expired. Please sign in again.')
+
       const { data, error } = await supabase
         .from('employees')
         .update(input)
@@ -83,6 +92,7 @@ export function useUpdateEmployee() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] })
+      broadcastInvalidate(['employees'])
       toast.success('Employee updated')
     },
     onError: (error) => {
@@ -134,6 +144,9 @@ export function useUpsertSalary() {
 
   return useMutation({
     mutationFn: async (input: UpsertSalaryInput) => {
+      const ok = await ensureFreshSession()
+      if (!ok) throw new Error('Your session has expired. Please sign in again.')
+
       const monthDate = input.month.length === 7 ? `${input.month}-01` : input.month
       if (input.id) {
         // Update existing
@@ -162,6 +175,7 @@ export function useUpsertSalary() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['salaries', variables.month] })
+      broadcastInvalidate(['salaries'])
       toast.success('Salary record saved')
     },
     onError: (error) => {
@@ -181,6 +195,9 @@ export function useRecordPayment() {
 
   return useMutation({
     mutationFn: async ({ id, month }: { id: string; month: string }) => {
+      const ok = await ensureFreshSession()
+      if (!ok) throw new Error('Your session has expired. Please sign in again.')
+
       const { data, error } = await supabase
         .from('salaries')
         .update({ paid_at: new Date().toISOString() })
@@ -193,6 +210,7 @@ export function useRecordPayment() {
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['salaries', result.month] })
+      broadcastInvalidate(['salaries'])
       toast.success('Salary marked as paid')
     },
     onError: (error) => {

@@ -14,6 +14,7 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const rawRedirect = searchParams.get('redirect') ?? '/dashboard'
   const redirect = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : '/dashboard'
+  const reason = searchParams.get('reason')
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -123,6 +124,15 @@ function LoginForm() {
                   className="h-12 text-base"
                 />
               </div>
+
+              {reason === 'expired' && !error && (
+                <p
+                  role="status"
+                  className="text-sm text-amber-700 bg-amber-50 rounded-md px-3 py-2"
+                >
+                  Your session expired. Please sign in again.
+                </p>
+              )}
 
               {error && (
                 <p

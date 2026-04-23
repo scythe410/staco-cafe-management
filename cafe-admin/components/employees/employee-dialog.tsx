@@ -24,6 +24,8 @@ import {
   useUpdateEmployee,
   type CreateEmployeeInput,
 } from '@/hooks/useEmployees'
+import { validateStringLength } from '@/lib/validation'
+import { toast } from 'sonner'
 import type { Employee } from '@/lib/types'
 
 const EMPLOYEE_ROLES = ['Manager', 'Chef', 'Barista', 'Waiter', 'Cashier', 'Kitchen Helper', 'Cleaner', 'Other'] as const
@@ -86,6 +88,11 @@ export function EmployeeDialog({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
+    const nameErr = validateStringLength(fullName, 'Full name', 80, { required: true })
+    if (nameErr) { toast.error(nameErr); return }
+    const contactErr = validateStringLength(contact, 'Contact', 30)
+    if (contactErr) { toast.error(contactErr); return }
+
     const input: CreateEmployeeInput = {
       full_name: fullName.trim(),
       role,
@@ -127,6 +134,7 @@ export function EmployeeDialog({
             <Label>Full Name</Label>
             <Input
               required
+              maxLength={80}
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               className="h-11"
@@ -153,6 +161,7 @@ export function EmployeeDialog({
                 value={contact}
                 onChange={(e) => setContact(e.target.value)}
                 placeholder="Phone / email"
+                maxLength={30}
                 className="h-11"
               />
             </div>

@@ -199,6 +199,7 @@ export function AddOrderDialog() {
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
                 placeholder="Optional"
+                maxLength={60}
                 className="h-11"
               />
             </div>

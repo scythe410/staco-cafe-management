@@ -7,6 +7,79 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// ─── Sri Lanka timezone helpers ─────────────────────────────────
+// Sri Lanka is UTC+5:30 — fixed, no DST
+const SL_OFFSET_MINUTES = 5 * 60 + 30
+
+/**
+ * Get the UTC ISO string for the start of "today" in Sri Lanka time.
+ */
+export function startOfTodaySL(): string {
+  const now = new Date()
+  const slNow = new Date(now.getTime() + SL_OFFSET_MINUTES * 60 * 1000)
+  slNow.setUTCHours(0, 0, 0, 0)
+  return new Date(slNow.getTime() - SL_OFFSET_MINUTES * 60 * 1000).toISOString()
+}
+
+/**
+ * Get the UTC ISO string for the start of "tomorrow" in Sri Lanka time.
+ */
+export function startOfTomorrowSL(): string {
+  const start = new Date(startOfTodaySL())
+  start.setUTCDate(start.getUTCDate() + 1)
+  return start.toISOString()
+}
+
+/**
+ * Get start of a relative day in SL time, N days before today.
+ */
+export function startOfDaysAgoSL(days: number): string {
+  const start = new Date(startOfTodaySL())
+  start.setUTCDate(start.getUTCDate() - days)
+  return start.toISOString()
+}
+
+/**
+ * Get start of the current month in SL time, as UTC ISO string.
+ */
+export function startOfMonthSL(): string {
+  const now = new Date()
+  const slNow = new Date(now.getTime() + SL_OFFSET_MINUTES * 60 * 1000)
+  slNow.setUTCDate(1)
+  slNow.setUTCHours(0, 0, 0, 0)
+  return new Date(slNow.getTime() - SL_OFFSET_MINUTES * 60 * 1000).toISOString()
+}
+
+/**
+ * Get start of previous month in SL time, as UTC ISO string.
+ */
+export function startOfPreviousMonthSL(): string {
+  const start = new Date(startOfMonthSL())
+  start.setUTCMonth(start.getUTCMonth() - 1)
+  return start.toISOString()
+}
+
+/**
+ * Get the start of a specific calendar date in SL time, as UTC ISO string.
+ * Converts a date picker value (yyyy-MM-dd) to the SL-day boundary.
+ */
+export function startOfDateSL(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const slMidnight = Date.UTC(y, m - 1, d, 0, 0, 0, 0)
+  return new Date(slMidnight - SL_OFFSET_MINUTES * 60 * 1000).toISOString()
+}
+
+/**
+ * Get the SL-local date string (yyyy-MM-dd) for a UTC ISO timestamp.
+ */
+export function toSLDateString(utcIso: string): string {
+  const d = new Date(new Date(utcIso).getTime() + SL_OFFSET_MINUTES * 60 * 1000)
+  const yyyy = d.getUTCFullYear()
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0')
+  const dd = String(d.getUTCDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
 /**
  * Format cents (integer) as LKR with 2 decimal places.
  * e.g. 8925000 → "LKR 89,250.00"
@@ -34,6 +107,17 @@ export function formatDate(input: string | Date | null | undefined): string {
   } catch {
     return '—'
   }
+}
+
+/**
+ * Escape characters that have special meaning in Postgres ILIKE
+ * patterns (%, _, \) so user input is treated as a literal substring.
+ */
+export function escapeLikePattern(input: string): string {
+  return input
+    .replace(/\\/g, '\\\\')
+    .replace(/%/g, '\\%')
+    .replace(/_/g, '\\_')
 }
 
 /**

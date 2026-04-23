@@ -74,7 +74,7 @@ export function IngredientForm({ initial, onSubmit, isPending }: IngredientFormP
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
-        <Input id="name" required value={name} onChange={(e) => setName(e.target.value)} className="h-11" />
+        <Input id="name" required maxLength={80} value={name} onChange={(e) => setName(e.target.value)} className="h-11" />
       </div>
 
       <div className="grid grid-cols-2 gap-4">

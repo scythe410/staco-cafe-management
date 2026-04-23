@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createBrowserClient } from '@/lib/supabase'
+import { ensureFreshSession } from '@/lib/auth'
+import { broadcastInvalidate } from '@/hooks/useCrossTabSync'
 import { toast } from 'sonner'
 import type { Ingredient, Supplier } from '@/lib/types'
 import type { StockUpdateType } from '@/constants/inventory'
@@ -55,6 +57,9 @@ export function useCreateIngredient() {
 
   return useMutation({
     mutationFn: async (input: CreateIngredientInput) => {
+      const ok = await ensureFreshSession()
+      if (!ok) throw new Error('Your session has expired. Please sign in again.')
+
       const { data, error } = await supabase
         .from('ingredients')
         .insert(input)
@@ -70,6 +75,8 @@ export function useCreateIngredient() {
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStock'] })
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStockCount'] })
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lastRestock'] })
+      broadcastInvalidate(['ingredients'])
+      broadcastInvalidate(['dashboard', 'lowStock'])
       toast.success('Ingredient added')
     },
     onError: (error) => {
@@ -93,6 +100,9 @@ export function useUpdateIngredient() {
 
   return useMutation({
     mutationFn: async ({ id, ...input }: UpdateIngredientInput) => {
+      const ok = await ensureFreshSession()
+      if (!ok) throw new Error('Your session has expired. Please sign in again.')
+
       const { data, error } = await supabase
         .from('ingredients')
         .update(input)
@@ -109,6 +119,8 @@ export function useUpdateIngredient() {
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStock'] })
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStockCount'] })
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lastRestock'] })
+      broadcastInvalidate(['ingredients'])
+      broadcastInvalidate(['dashboard', 'lowStock'])
       toast.success('Ingredient updated')
     },
     onError: (error) => {
@@ -204,6 +216,9 @@ export function useCreateStockUpdate() {
 
   return useMutation({
     mutationFn: async (input: StockUpdateInput) => {
+      const ok = await ensureFreshSession()
+      if (!ok) throw new Error('Your session has expired. Please sign in again.')
+
       // The DB trigger `apply_stock_update` auto-adjusts ingredients.quantity
       const { data, error } = await supabase
         .from('stock_updates')
@@ -220,6 +235,8 @@ export function useCreateStockUpdate() {
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStock'] })
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lowStockCount'] })
       queryClient.invalidateQueries({ queryKey: ['ingredients', 'lastRestock'] })
+      broadcastInvalidate(['ingredients'])
+      broadcastInvalidate(['dashboard', 'lowStock'])
       toast.success('Stock updated')
     },
     onError: (error) => {

@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { LogOut } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
 import { cn } from '@/lib/utils'
 import { NAV_ITEMS } from '@/constants/navigation'
 import { createBrowserClient } from '@/lib/supabase'
@@ -17,13 +18,14 @@ interface SidebarProps {
 
 export function Sidebar({ userName, userRole }: SidebarProps) {
   const pathname = usePathname()
-  const router = useRouter()
+  const queryClient = useQueryClient()
   const { data: lowStockCount } = useLowStockCount()
 
   async function handleSignOut() {
     const supabase = createBrowserClient()
+    queryClient.clear()
     await supabase.auth.signOut()
-    router.push('/auth/login')
+    window.location.href = '/auth/login'
   }
 
   return (

@@ -134,6 +134,7 @@ export function AddExpenseDialog({ userId }: AddExpenseDialogProps) {
               id="expDesc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              maxLength={200}
               rows={2}
             />
           </div>

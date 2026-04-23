@@ -3,6 +3,7 @@
 import { Sidebar } from '@/components/shared/sidebar'
 import { BottomNav } from '@/components/shared/bottom-nav'
 import { NotificationBell } from '@/components/shared/notification-bell'
+import { useCrossTabSync } from '@/hooks/useCrossTabSync'
 import type { Role } from '@/constants/roles'
 
 interface ProtectedShellProps {
@@ -12,6 +13,8 @@ interface ProtectedShellProps {
 }
 
 export function ProtectedShell({ userName, userRole, children }: ProtectedShellProps) {
+  useCrossTabSync()
+
   return (
     <div className="min-h-screen">
       <Sidebar userName={userName} userRole={userRole} />

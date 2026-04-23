@@ -1,3 +1,18 @@
+export function validateStringLength(
+  value: string | null | undefined,
+  fieldName: string,
+  max: number,
+  opts: { required?: boolean } = {}
+): string | null {
+  if (!value || !value.trim()) {
+    return opts.required ? `${fieldName} is required` : null
+  }
+  if (value.length > max) {
+    return `${fieldName} must be ${max} characters or fewer`
+  }
+  return null
+}
+
 export function validatePositiveNumber(
   value: number | string,
   fieldName: string,
