@@ -19,7 +19,7 @@ import {
   useRecordPayment,
   type SalaryWithEmployee,
 } from '@/hooks/useEmployees'
-import { formatCurrency, formatDate } from '@/lib/utils'
+import { formatCurrency, formatDate, escapeHtml } from '@/lib/utils'
 import { SalaryDialog } from './salary-dialog'
 import { ROLES, type Role } from '@/constants/roles'
 import { format } from 'date-fns'
@@ -37,7 +37,7 @@ export function SalaryTable({ userRole }: SalaryTableProps) {
   const isOwner = userRole === ROLES.OWNER
 
   function handlePrint(salary: SalaryWithEmployee) {
-    const employeeName = salary.employees?.full_name ?? 'Employee'
+    const employeeName = escapeHtml(salary.employees?.full_name ?? 'Employee')
     const w = window.open('', '_blank', 'width=600,height=700')
     if (!w) return
     w.document.write(`

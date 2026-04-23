@@ -51,8 +51,10 @@ function serializeCookie(
   if (options.maxAge) cookie += `; Max-Age=${options.maxAge}`
   if (options.path) cookie += `; Path=${options.path}`
   if (options.domain) cookie += `; Domain=${options.domain}`
-  if (options.sameSite) cookie += `; SameSite=${options.sameSite}`
+  // Default to Lax if Supabase SSR doesn't specify — prevents CSRF
+  cookie += `; SameSite=${options.sameSite ?? 'Lax'}`
   if (options.httpOnly) cookie += '; HttpOnly'
-  if (options.secure) cookie += '; Secure'
+  // Default to Secure in production
+  if (options.secure || (!options.secure && typeof window === 'undefined')) cookie += '; Secure'
   return cookie
 }

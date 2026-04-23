@@ -83,8 +83,10 @@ export function useOrders(filters: OrderFilters = {}) {
         query = query.lt('created_at', nextDay.toISOString())
       }
       if (filters.search?.trim()) {
-        const term = filters.search.trim()
-        query = query.or(`id.eq.${term},customer_name.ilike.%${term}%`)
+        const term = filters.search.trim().replace(/[,().*]/g, '')
+        if (term) {
+          query = query.or(`id.eq.${term},customer_name.ilike.%${term}%`)
+        }
       }
 
       const { data, error } = await query

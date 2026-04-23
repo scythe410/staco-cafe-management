@@ -9,6 +9,14 @@ export const ROLES = {
 
 export type Role = (typeof ROLES)[keyof typeof ROLES]
 
+const VALID_ROLES = new Set<string>(Object.values(ROLES))
+
+/** Returns the role if valid, or null if unknown/missing. */
+export function parseRole(raw: unknown): Role | null {
+  if (typeof raw === 'string' && VALID_ROLES.has(raw)) return raw as Role
+  return null
+}
+
 // Routes each role is permitted to access (prefix-based)
 // A role may access a route if any listed prefix matches the pathname start.
 // owner is implicitly allowed everywhere — checked first in proxy.

@@ -1,7 +1,12 @@
 -- ============================================================
--- seed.sql — Development seed data for Staco Cafe Management
+-- seed.sql — Development seed data for Stacko Cafe Management
 -- All monetary values in cents (1 LKR = 100 cents)
 -- Run AFTER 001_initial_schema.sql
+--
+-- ⚠️  DEV ONLY — DO NOT USE IN PRODUCTION  ⚠️
+-- These credentials are for local development only.
+-- Production must use unique, strong passwords created via
+-- the Supabase Dashboard. Never reuse these passwords.
 --
 -- Dev login credentials (all use password: Dev@1234)
 --   ceo@staco.lk     → owner

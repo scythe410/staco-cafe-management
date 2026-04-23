@@ -1,6 +1,6 @@
 'use client'
 
-import { formatCurrency } from '@/lib/utils'
+import { formatCurrency, escapeHtml } from '@/lib/utils'
 import {
   ORDER_SOURCE_LABELS,
   COMMISSION_SOURCES,
@@ -18,7 +18,7 @@ export function getBillHtml(order: OrderDetail): string {
   const origin = typeof window !== 'undefined' ? window.location.origin : ''
 
   const itemsHtml = order.order_items.map((item) => {
-    const name = item.menu_items?.name ?? 'Item'
+    const name = escapeHtml(item.menu_items?.name ?? 'Item')
     const lineTotal = item.unit_price * item.quantity
     return `<tr>
       <td>${name}</td>
@@ -58,7 +58,7 @@ export function getBillHtml(order: OrderDetail): string {
       <tr><td class="meta-label">Date</td><td class="meta-value">${format(new Date(order.created_at), 'dd MMM yyyy')}</td></tr>
       <tr><td class="meta-label">Time</td><td class="meta-value">${format(new Date(order.created_at), 'h:mm a')}</td></tr>
       <tr><td class="meta-label">Type</td><td class="meta-value">${ORDER_SOURCE_LABELS[order.source as OrderSource]}</td></tr>
-      <tr><td class="meta-label">Customer</td><td class="meta-value">${order.customer_name || '—'}</td></tr>
+      <tr><td class="meta-label">Customer</td><td class="meta-value">${escapeHtml(order.customer_name || '—')}</td></tr>
     </table>
 
     <div class="divider"></div>

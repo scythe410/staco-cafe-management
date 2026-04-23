@@ -36,8 +36,15 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // Fetch role from user metadata (set during sign-up / admin seed)
-  const role = (user.user_metadata?.role ?? user.app_metadata?.role ?? '') as Role
+  // Fetch authoritative role from the users table (not JWT metadata, which
+  // users can modify via supabase.auth.updateUser).
+  const { data: dbUser } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  const role = (dbUser?.role ?? '') as Role
 
   // Redirect root to dashboard for all authenticated users
   if (pathname === '/') {

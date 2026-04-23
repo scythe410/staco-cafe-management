@@ -26,6 +26,18 @@ export function formatDate(date: string | Date): string {
 }
 
 /**
+ * Escape a string for safe insertion into HTML (prevents XSS).
+ */
+export function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
+}
+
+/**
  * Convert a 2D array (headers + rows) to CSV and trigger a download.
  */
 export function downloadCSV(headers: string[], rows: string[][], filename: string) {

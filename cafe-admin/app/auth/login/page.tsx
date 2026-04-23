@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useState } from 'react'
+import { Suspense, useState, useRef, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createBrowserClient } from '@/lib/supabase'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,15 +12,38 @@ import Image from 'next/image'
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') ?? '/dashboard'
+  const rawRedirect = searchParams.get('redirect') ?? '/dashboard'
+  const redirect = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : '/dashboard'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null)
+  const failCount = useRef(0)
+
+  const MAX_ATTEMPTS = 5
+  const LOCKOUT_MS = 30_000 // 30 seconds
+
+  const isLocked = useCallback(() => {
+    if (!lockedUntil) return false
+    if (Date.now() >= lockedUntil) {
+      setLockedUntil(null)
+      failCount.current = 0
+      return false
+    }
+    return true
+  }, [lockedUntil])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+
+    if (isLocked()) {
+      const secsLeft = Math.ceil(((lockedUntil ?? 0) - Date.now()) / 1000)
+      setError(`Too many failed attempts. Try again in ${secsLeft} seconds.`)
+      return
+    }
+
     setError(null)
     setLoading(true)
 
@@ -31,15 +54,22 @@ function LoginForm() {
     })
 
     if (authError) {
-      setError(
-        authError.message === 'Invalid login credentials'
-          ? 'Incorrect email or password. Please try again.'
-          : authError.message,
-      )
+      failCount.current += 1
+      if (failCount.current >= MAX_ATTEMPTS) {
+        setLockedUntil(Date.now() + LOCKOUT_MS)
+        setError(`Too many failed attempts. Locked for 30 seconds.`)
+      } else {
+        setError(
+          authError.message === 'Invalid login credentials'
+            ? `Incorrect email or password. ${MAX_ATTEMPTS - failCount.current} attempts remaining.`
+            : authError.message,
+        )
+      }
       setLoading(false)
       return
     }
 
+    failCount.current = 0
     router.push(redirect)
     router.refresh()
   }
@@ -106,7 +136,7 @@ function LoginForm() {
               <Button
                 type="submit"
                 className="w-full h-12 text-base"
-                disabled={loading}
+                disabled={loading || isLocked()}
               >
                 {loading ? 'Signing in...' : 'Sign in'}
               </Button>
