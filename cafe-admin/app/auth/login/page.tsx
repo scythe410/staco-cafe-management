@@ -116,13 +116,13 @@ function LoginForm() {
       </div>
 
       {/* Powered by NeuralShift */}
-      <div className="mt-auto pb-4 flex flex-col items-center">
-        <p className="text-xs text-muted-foreground -mb-8">Powered by</p>
+      <div className="mt-auto pb-4 flex flex-col items-center gap-0.5">
+        <p className="text-xs text-muted-foreground">Powered by</p>
         <Image
           src="/logos/neuralshift-logo.png"
           alt="NeuralShift"
-          width={160}
-          height={37}
+          width={120}
+          height={28}
         />
       </div>
     </main>
