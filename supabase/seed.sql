@@ -72,7 +72,7 @@ insert into auth.users (
   crypt('Dev@1234', gen_salt('bf', 10)),
   now(),
   '{"provider":"email","providers":["email"]}',
-  '{"full_name":"Ravi Jayawardena"}',
+  '{"full_name":"Owner"}',
   now() - interval '90 days',
   now()
 ),
@@ -85,7 +85,7 @@ insert into auth.users (
   crypt('Dev@1234', gen_salt('bf', 10)),
   now(),
   '{"provider":"email","providers":["email"]}',
-  '{"full_name":"Samanthi Perera"}',
+  '{"full_name":"Manager"}',
   now() - interval '60 days',
   now()
 ),
@@ -98,7 +98,7 @@ insert into auth.users (
   crypt('Dev@1234', gen_salt('bf', 10)),
   now(),
   '{"provider":"email","providers":["email"]}',
-  '{"full_name":"Kasun Fernando"}',
+  '{"full_name":"Cashier"}',
   now() - interval '30 days',
   now()
 )
@@ -156,21 +156,21 @@ insert into users (id, email, full_name, role, created_at) values
 (
   'be4cc9f0-2a30-49ae-aaf5-a1e3f159f831',
   'ceo@staco.lk',
-  'Ravi Jayawardena',
+  'Owner',
   'owner',
   now() - interval '90 days'
 ),
 (
   'bf0bc2b6-374c-4f11-9e12-5f55c43d75c7',
   'manager@staco.lk',
-  'Samanthi Perera',
+  'Manager',
   'manager',
   now() - interval '60 days'
 ),
 (
   '93b58a03-3484-407f-a94c-f27788a43856',
   'cashier@staco.lk',
-  'Kasun Fernando',
+  'Cashier',
   'cashier',
   now() - interval '30 days'
 )
