@@ -22,3 +22,6 @@ out/
 # Misc
 *.log
 notes.md
+
+# Supabase CLI temp files
+supabase/.temp/

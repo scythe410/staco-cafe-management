@@ -213,7 +213,6 @@ export function useCreateOrder() {
         p_discount: 0,
         p_tax: 0,
         p_total_amount: subtotal,
-        p_created_by: null,
         p_items: input.items.map((item) => ({
           menu_item_id: item.menu_item_id,
           quantity: item.quantity,

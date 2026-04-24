@@ -6,7 +6,6 @@ CREATE OR REPLACE FUNCTION create_order_with_items(
   p_discount integer,
   p_tax integer,
   p_total_amount integer,
-  p_created_by uuid,
   p_items jsonb
 )
 RETURNS uuid
@@ -20,11 +19,11 @@ BEGIN
   -- Insert order
   INSERT INTO orders (
     source, customer_name, payment_method, commission,
-    discount, tax, total_amount, created_by, status
+    discount, tax, total_amount, status
   )
   VALUES (
     p_source, p_customer_name, p_payment_method, p_commission,
-    p_discount, p_tax, p_total_amount, p_created_by, 'new_order'
+    p_discount, p_tax, p_total_amount, 'new_order'
   )
   RETURNING id INTO new_order_id;
 
