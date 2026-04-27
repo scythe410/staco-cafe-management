@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Plus, Minus, Trash2, ChevronDown, ChevronRight } from 'lucide-react'
+import { Plus, Minus, Trash2, ChevronDown, ChevronRight, AlertTriangle } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -61,6 +61,13 @@ export function AddOrderDialog() {
   const total = useMemo(
     () => lines.reduce((sum, l) => sum + l.unit_price * l.quantity, 0),
     [lines],
+  )
+
+  // Set of currently-available menu item IDs — used to flag cart lines
+  // whose underlying menu item was marked unavailable mid-session.
+  const availableIds = useMemo(
+    () => new Set((menuItems ?? []).map((m) => m.id)),
+    [menuItems],
   )
 
   const showCommission = COMMISSION_SOURCES.includes(source)
@@ -291,9 +298,19 @@ export function AddOrderDialog() {
           {/* Line items */}
           {lines.length > 0 && (
             <div className="space-y-2 rounded-lg border p-3">
-              {lines.map((line) => (
+              {lines.map((line) => {
+                const unavailable = menuItems !== undefined && !availableIds.has(line.menu_item_id)
+                return (
                 <div key={line.menu_item_id} className="flex items-center gap-2 text-sm">
-                  <span className="flex-1 truncate">{line.name}</span>
+                  <span className="flex-1 truncate flex items-center gap-1.5">
+                    {unavailable && (
+                      <AlertTriangle
+                        className="h-3.5 w-3.5 text-amber-600 shrink-0"
+                        aria-label="No longer available"
+                      />
+                    )}
+                    {line.name}
+                  </span>
                   <span className="text-muted-foreground text-xs">
                     {formatCurrency(line.unit_price)}
                   </span>
@@ -331,7 +348,8 @@ export function AddOrderDialog() {
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
-              ))}
+                )
+              })}
               <div className="flex justify-between pt-2 border-t font-semibold text-sm">
                 <span>Total</span>
                 <span>{formatCurrency(total)}</span>

@@ -245,6 +245,33 @@
 - [x] Fix 6: Clean logout — sidebar sign-out clears React Query cache + forces full page reload to `/auth/login`
 - [x] TypeScript check — zero errors
 
+### ✅ Phase 12 — Menu Management Module (COMPLETE)
+- [x] New `/menu` route — `app/(protected)/menu/page.tsx` (owner + manager only)
+  - Sidebar + bottom nav updated (Inventory → Menu → Orders order, `UtensilsCrossed` icon)
+  - `constants/roles.ts` — `/menu` added to manager allowed routes; cashier/inventory/kitchen blocked (proxy enforces)
+- [x] `hooks/useMenu.ts` — full menu CRUD with React Query
+  - `useMenuItems({ category, availability, search })` — filtered list, escapeLikePattern on search
+  - `useMenuItem(id)`, `useUnavailableMenuCount()`, `useMenuItemUsageCount(id)`
+  - `useCreateMenuItem`, `useUpdateMenuItem` — ensureFreshSession + toast + broadcastInvalidate
+  - `useToggleMenuItemAvailability` — optimistic update with rollback on error
+  - `useDeleteMenuItem` — checks `order_items` count first, throws `MenuItemInUseError` if referenced
+- [x] Menu table — `components/menu/menu-table.tsx`
+  - Columns: Name (with notes), Category badge (CATEGORY_BADGE_STYLES), Price (LKR), Status (Switch + label), Last Updated, Actions
+  - Filters: search, category dropdown (all + MENU_CATEGORIES), availability dropdown (all/available/unavailable)
+  - 44px row height, 44px icon buttons for tablet touch targets
+  - Empty state with helpful message
+- [x] Add Item dialog — `components/menu/add-item-dialog.tsx` (Plus button)
+- [x] Edit Item dialog — `components/menu/edit-item-dialog.tsx` (pre-filled, LKR↔cents conversion)
+- [x] Shared form — `components/menu/menu-item-form.tsx` (name 80, category, price, availability switch, notes 200)
+- [x] Delete confirmation — `components/menu/delete-item-dialog.tsx` using new `AlertDialog`
+  - Queries `order_items` count via `useMenuItemUsageCount` — if > 0 shows "Cannot delete" with guidance to mark unavailable instead
+- [x] Inline availability toggle — Switch in status column, optimistic update via React Query setQueryData, reverts UI on error
+- [x] New shadcn/ui primitives — `components/ui/switch.tsx`, `components/ui/alert-dialog.tsx` (radix-ui wrappers)
+- [x] Add-order dialog updated — when a cart line item's menu_item_id is no longer in the available list, an amber `AlertTriangle` icon appears next to the line name; menu items query already filters `is_available = true`
+- [x] Unavailable menu count badge in sidebar + bottom-nav, mirrors low-stock pattern with amber styling
+- [x] TypeScript check — zero errors
+- [x] Production build — passes clean
+
 ## Known issues / blockers
 - None
 

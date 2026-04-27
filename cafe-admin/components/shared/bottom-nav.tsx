@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { NAV_ITEMS } from '@/constants/navigation'
 import { useLowStockCount } from '@/hooks/useInventory'
+import { useUnavailableMenuCount } from '@/hooks/useMenu'
 import { ROLES, ROLE_ALLOWED_ROUTES, type Role } from '@/constants/roles'
 
 interface BottomNavProps {
@@ -14,6 +15,7 @@ interface BottomNavProps {
 export function BottomNav({ userRole }: BottomNavProps) {
   const pathname = usePathname()
   const { data: lowStockCount } = useLowStockCount()
+  const { data: unavailableMenuCount } = useUnavailableMenuCount()
 
   const visibleItems = NAV_ITEMS.filter((item) => {
     if (userRole === ROLES.OWNER) return true
@@ -43,6 +45,11 @@ export function BottomNav({ userRole }: BottomNavProps) {
                 {item.href === '/inventory' && !!lowStockCount && (
                   <span className="absolute -top-1.5 -right-2 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive/10 px-1 text-[9px] font-medium text-destructive">
                     {lowStockCount}
+                  </span>
+                )}
+                {item.href === '/menu' && !!unavailableMenuCount && (
+                  <span className="absolute -top-1.5 -right-2 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500/15 px-1 text-[9px] font-medium text-amber-700 dark:text-amber-400">
+                    {unavailableMenuCount}
                   </span>
                 )}
               </span>

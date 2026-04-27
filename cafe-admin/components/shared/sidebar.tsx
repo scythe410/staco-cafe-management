@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 import { NAV_ITEMS } from '@/constants/navigation'
 import { createBrowserClient } from '@/lib/supabase'
 import { useLowStockCount } from '@/hooks/useInventory'
+import { useUnavailableMenuCount } from '@/hooks/useMenu'
 import { ROLES, ROLE_ALLOWED_ROUTES, type Role } from '@/constants/roles'
 
 interface SidebarProps {
@@ -20,6 +21,7 @@ export function Sidebar({ userName, userRole }: SidebarProps) {
   const pathname = usePathname()
   const queryClient = useQueryClient()
   const { data: lowStockCount } = useLowStockCount()
+  const { data: unavailableMenuCount } = useUnavailableMenuCount()
 
   async function handleSignOut() {
     const supabase = createBrowserClient()
@@ -68,6 +70,11 @@ export function Sidebar({ userName, userRole }: SidebarProps) {
               {item.href === '/inventory' && !!lowStockCount && (
                 <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive/10 px-1.5 text-[10px] font-medium text-destructive">
                   {lowStockCount}
+                </span>
+              )}
+              {item.href === '/menu' && !!unavailableMenuCount && (
+                <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500/15 px-1.5 text-[10px] font-medium text-amber-700 dark:text-amber-400">
+                  {unavailableMenuCount}
                 </span>
               )}
             </Link>
