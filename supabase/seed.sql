@@ -3,7 +3,7 @@
 -- All monetary values in cents (1 LKR = 100 cents)
 -- Run AFTER 001_initial_schema.sql
 --
--- ⚠️  DEV ONLY — DO NOT USE IN PRODUCTION  ⚠️
+-- ⚠️  DEV ONLY — DO NOT USE IN PRODUCTION
 -- These credentials are for local development only.
 -- Production must use unique, strong passwords created via
 -- the Supabase Dashboard. Never reuse these passwords.

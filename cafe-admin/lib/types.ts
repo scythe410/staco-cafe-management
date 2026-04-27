@@ -129,8 +129,60 @@ export interface StockUpdate {
 
 export interface Notification {
   id: string
-  type: 'low_stock' | 'salary_due' | 'order' | 'system'
+  type: 'low_stock' | 'salary_due' | 'order' | 'system' | 'booking'
   message: string
   is_read: boolean
+  created_at: string
+}
+
+export interface Booking {
+  id: string
+  booking_code: string
+  customer_name: string
+  customer_phone: string
+  customer_email: string | null
+  party_size: number
+  occasion: string | null
+  booking_date: string         // yyyy-MM-dd
+  start_time: string           // HH:mm:ss
+  end_time: string             // HH:mm:ss
+  table_or_area: string | null
+  special_notes: string | null
+  subtotal: number             // cents (food)
+  booking_fee: number          // cents (venue/booking charge)
+  discount: number             // cents
+  service_charge: number       // cents
+  tax: number                  // cents
+  total_amount: number         // cents
+  deposit_paid: number         // cents
+  deposit_method: string | null
+  balance_due: number          // cents
+  status: 'tentative' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show'
+  source: 'walk_in' | 'phone' | 'whatsapp' | 'email'
+  created_by: string | null
+  created_at: string
+  updated_at: string
+  cancelled_at: string | null
+  cancellation_reason: string | null
+}
+
+export interface BookingItem {
+  id: string
+  booking_id: string
+  menu_item_id: string
+  quantity: number
+  unit_price: number  // cents
+  notes: string | null
+  created_at: string
+}
+
+export interface BookingPayment {
+  id: string
+  booking_id: string
+  amount: number  // cents
+  method: string
+  type: 'deposit' | 'balance' | 'refund'
+  reference: string | null
+  recorded_by: string | null
   created_at: string
 }

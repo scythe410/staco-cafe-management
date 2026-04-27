@@ -22,8 +22,8 @@ BEGIN
     discount, tax, total_amount, status
   )
   VALUES (
-    p_source, p_customer_name, p_payment_method, p_commission,
-    p_discount, p_tax, p_total_amount, 'new_order'
+    p_source::order_source, p_customer_name, p_payment_method::payment_method, p_commission,
+    p_discount, p_tax, p_total_amount, 'new_order'::order_status
   )
   RETURNING id INTO new_order_id;
 

@@ -4,6 +4,7 @@ import {
   Package,
   UtensilsCrossed,
   ShoppingCart,
+  CalendarCheck,
   Users,
   FileBarChart,
   type LucideIcon,
@@ -21,6 +22,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Inventory', href: '/inventory', icon: Package },
   { label: 'Menu', href: '/menu', icon: UtensilsCrossed },
   { label: 'Orders', href: '/orders', icon: ShoppingCart },
+  { label: 'Bookings', href: '/bookings', icon: CalendarCheck },
   { label: 'Employees', href: '/employees', icon: Users },
   { label: 'Reports', href: '/reports', icon: FileBarChart },
 ]

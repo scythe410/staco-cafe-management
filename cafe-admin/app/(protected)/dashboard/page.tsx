@@ -5,6 +5,7 @@ import { ProfitEstimate } from '@/components/dashboard/profit-estimate'
 import { LowStockAlert } from '@/components/dashboard/low-stock-alert'
 import { OrdersBySource } from '@/components/dashboard/orders-by-source'
 import { RevenueTrend } from '@/components/dashboard/revenue-trend'
+import { TodaysBookings } from '@/components/dashboard/todays-bookings'
 
 export default function DashboardPage() {
   return (
@@ -19,10 +20,15 @@ export default function DashboardPage() {
         <ProfitEstimate />
       </div>
 
-      {/* Bottom row — charts + alerts */}
+      {/* Middle row — bookings + low stock */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <OrdersBySource />
+        <TodaysBookings />
         <LowStockAlert />
+      </div>
+
+      {/* Bottom row — orders by source */}
+      <div className="grid grid-cols-1 gap-4">
+        <OrdersBySource />
       </div>
 
       {/* Full-width revenue trend */}

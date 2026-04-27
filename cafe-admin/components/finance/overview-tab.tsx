@@ -24,6 +24,7 @@ import {
   type DatePreset,
   type DateRange,
 } from '@/hooks/useFinance'
+import { useBookingRevenue } from '@/hooks/useBookings'
 import { DateRangePicker } from './date-range-picker'
 
 interface OverviewTabProps {
@@ -45,6 +46,7 @@ export function OverviewTab({
   const { data: revenueData, isLoading: loadingRevenue } = useRevenueByDay(range)
   const { data: paymentData, isLoading: loadingPayment } = usePaymentMethodSplit(range)
   const { data: comparison, isLoading: loadingComparison } = useMonthComparison()
+  const { data: bookingRevenue, isLoading: loadingBookingRevenue } = useBookingRevenue(range.from, range.to)
 
   return (
     <div className="space-y-6">
@@ -56,11 +58,17 @@ export function OverviewTab({
       />
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <KpiCard
           label="Total Income"
           value={summary?.totalIncome}
           loading={loadingSummary}
+          className="text-emerald-600"
+        />
+        <KpiCard
+          label="Booking Revenue"
+          value={bookingRevenue}
+          loading={loadingBookingRevenue}
           className="text-emerald-600"
         />
         <KpiCard

@@ -1,6 +1,6 @@
 'use client'
 
-import { Bell, AlertTriangle, DollarSign, ShoppingCart, Info, CheckCheck } from 'lucide-react'
+import { Bell, AlertTriangle, DollarSign, ShoppingCart, Info, CheckCheck, CalendarCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Popover,
@@ -23,6 +23,7 @@ const TYPE_ICONS: Record<Notification['type'], typeof Bell> = {
   salary_due: DollarSign,
   order: ShoppingCart,
   system: Info,
+  booking: CalendarCheck,
 }
 
 const TYPE_COLORS: Record<Notification['type'], string> = {
@@ -30,6 +31,7 @@ const TYPE_COLORS: Record<Notification['type'], string> = {
   salary_due: 'text-amber-600',
   order: 'text-blue-600',
   system: 'text-muted-foreground',
+  booking: 'text-emerald-600',
 }
 
 export function NotificationBell() {
