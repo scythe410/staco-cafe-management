@@ -400,7 +400,7 @@ export function BookingFormDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="max-w-2xl w-[96vw] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl w-[96vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? `Edit Booking ${booking?.booking_code}` : 'New Booking'}</DialogTitle>
         </DialogHeader>
@@ -676,7 +676,7 @@ export function BookingFormDialog({
           {/* SECTION 5: Pricing */}
           <section className="space-y-3">
             <h3 className="text-sm font-semibold">Pricing</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="space-y-1.5">
                 <Label>Booking Fee (LKR)</Label>
                 <Input
