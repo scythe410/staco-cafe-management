@@ -10,12 +10,14 @@ import {
   type DateRange,
   getPresetRange,
 } from '@/hooks/useFinance'
+import type { Role } from '@/constants/roles'
 
 interface FinanceTabsProps {
   userId: string
+  userRole: Role
 }
 
-export function FinanceTabs({ userId }: FinanceTabsProps) {
+export function FinanceTabs({ userId, userRole }: FinanceTabsProps) {
   const [preset, setPreset] = useState<DatePreset>('this_month')
   const [customRange, setCustomRange] = useState<DateRange>(getPresetRange('this_month'))
 
@@ -40,7 +42,7 @@ export function FinanceTabs({ userId }: FinanceTabsProps) {
       </TabsContent>
 
       <TabsContent value="expenses" className="mt-6">
-        <ExpensesTab range={range} userId={userId} />
+        <ExpensesTab range={range} userId={userId} userRole={userRole} />
       </TabsContent>
 
       <TabsContent value="platforms" className="mt-6">

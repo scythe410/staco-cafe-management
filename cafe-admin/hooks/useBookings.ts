@@ -24,6 +24,7 @@ export interface BookingFilters {
   dateFrom?: string         // yyyy-MM-dd
   dateTo?: string           // yyyy-MM-dd
   search?: string           // name, phone, or code
+  archived?: boolean        // false (default) = active list, true = archived viewer
 }
 
 export type BookingRow = Booking & {
@@ -46,9 +47,13 @@ export function useBookings(filters: BookingFilters = {}) {
   return useQuery({
     queryKey: ['bookings', 'list', filters],
     queryFn: async () => {
+      // Display query: hide archived rows by default. useBookingRevenue
+      // and useBookingsReport intentionally read every row so financial
+      // totals and exports continue to include historical bookings.
       let query = supabase
         .from('bookings')
         .select('*, booking_items(count)')
+        .eq('is_archived', filters.archived === true)
 
       const today = toSLDateString(startOfTodaySL())
 
@@ -134,9 +139,11 @@ export function useUpcomingBookings(limit: number = 5) {
     queryKey: ['bookings', 'upcoming', limit],
     queryFn: async () => {
       const today = toSLDateString(startOfTodaySL())
+      // Display widget: skip archived rows.
       const { data, error } = await supabase
         .from('bookings')
         .select('id, booking_code, customer_name, party_size, booking_date, start_time, end_time, status, balance_due, total_amount')
+        .eq('is_archived', false)
         .gte('booking_date', today)
         .not('status', 'in', `(${BOOKING_STATUS.CANCELLED},${BOOKING_STATUS.COMPLETED},${BOOKING_STATUS.NO_SHOW})`)
         .order('booking_date', { ascending: true })
@@ -153,9 +160,11 @@ export function useTodaysBookings() {
     queryKey: ['bookings', 'today'],
     queryFn: async () => {
       const today = toSLDateString(startOfTodaySL())
+      // Display widget: skip archived rows.
       const { data, error } = await supabase
         .from('bookings')
         .select('id, booking_code, customer_name, party_size, start_time, end_time, status')
+        .eq('is_archived', false)
         .eq('booking_date', today)
         .order('start_time', { ascending: true })
       if (error) throw error
@@ -185,15 +194,20 @@ export function useBookingStats() {
       monthEnd.setUTCMonth(monthEnd.getUTCMonth() + 1)
       const monthEndStr = toSLDateString(monthEnd.toISOString())
 
+      // Display widget counts: skip archived rows.
       const [todayRes, weekRes, monthRes, balanceRes] = await Promise.all([
-        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('booking_date', today),
         supabase.from('bookings').select('id', { count: 'exact', head: true })
+          .eq('is_archived', false).eq('booking_date', today),
+        supabase.from('bookings').select('id', { count: 'exact', head: true })
+          .eq('is_archived', false)
           .gte('booking_date', today).lt('booking_date', weekEndStr)
           .not('status', 'in', `(${BOOKING_STATUS.CANCELLED},${BOOKING_STATUS.NO_SHOW})`),
         supabase.from('bookings').select('id', { count: 'exact', head: true })
+          .eq('is_archived', false)
           .gte('booking_date', monthStart).lt('booking_date', monthEndStr)
           .not('status', 'in', `(${BOOKING_STATUS.CANCELLED},${BOOKING_STATUS.NO_SHOW})`),
         supabase.from('bookings').select('balance_due')
+          .eq('is_archived', false)
           .gt('balance_due', 0)
           .eq('status', BOOKING_STATUS.CONFIRMED),
       ])
@@ -228,9 +242,11 @@ export function useBookingsByMonth(year: number, month: number) {
       const next = new Date(Date.UTC(year, month + 1, 1))
       const monthEnd = `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, '0')}-01`
 
+      // Calendar view: skip archived rows.
       const { data, error } = await supabase
         .from('bookings')
         .select('id, booking_code, booking_date, start_time, status, customer_name, party_size')
+        .eq('is_archived', false)
         .gte('booking_date', monthStart)
         .lt('booking_date', monthEnd)
         .order('booking_date')
@@ -262,9 +278,11 @@ export function useCheckBookingConflicts(
     queryKey: ['bookings', 'conflicts', date, startTime, endTime, excludeId],
     enabled: !!(date && startTime && endTime && endTime > startTime),
     queryFn: async () => {
+      // Conflict detection: archived bookings should not block new ones.
       let query = supabase
         .from('bookings')
         .select('id, booking_code, customer_name, party_size, start_time, end_time')
+        .eq('is_archived', false)
         .eq('booking_date', date!)
         .not('status', 'in', `(${BOOKING_STATUS.CANCELLED},${BOOKING_STATUS.NO_SHOW})`)
         // overlap test: existing.start < new.end AND existing.end > new.start
@@ -582,6 +600,7 @@ export function useBookingsReport(from: string, to: string) {
     queryKey: ['reports', 'bookings', from, to],
     enabled: !!from && !!to,
     queryFn: async () => {
+      // Reporting query: archived bookings intentionally included.
       const { data, error } = await supabase
         .from('bookings')
         .select('id, booking_code, customer_name, customer_phone, booking_date, start_time, end_time, party_size, occasion, source, status, total_amount, deposit_paid, balance_due')
@@ -629,6 +648,7 @@ export function useBookingRevenue(fromIso: string, toIso: string) {
     queryFn: async () => {
       const fromDate = toSLDateString(fromIso)
       const toDate = toSLDateString(toIso)
+      // Aggregate query: archived bookings intentionally included.
       const { data, error } = await supabase
         .from('bookings')
         .select('total_amount')

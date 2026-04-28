@@ -19,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useOrders, type OrderFilters } from '@/hooks/useOrders'
 import { formatCurrency, cn } from '@/lib/utils'
 import {
@@ -45,15 +46,19 @@ interface OrdersTableProps {
   userRole?: Role
 }
 
+type View = 'active' | 'archived'
+
 export function OrdersTable({ userRole }: OrdersTableProps) {
   const isReadOnly = userRole === ROLES.KITCHEN
   const [filters, setFilters] = useState<OrderFilters>({})
   const [search, setSearch] = useState('')
+  const [view, setView] = useState<View>('active')
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
 
   const appliedFilters: OrderFilters = {
     ...filters,
     search: search.trim() || undefined,
+    archived: view === 'archived',
   }
 
   const { data: orders, isLoading, isError } = useOrders(appliedFilters)
@@ -67,16 +72,24 @@ export function OrdersTable({ userRole }: OrdersTableProps) {
       {/* Toolbar */}
       <div className="flex flex-col gap-3">
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-          <div className="relative flex-1 max-w-xs w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by ID or customer..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-11"
-            />
+          <div className="flex flex-1 items-center gap-3 w-full">
+            <Tabs value={view} onValueChange={(v) => setView(v as View)}>
+              <TabsList>
+                <TabsTrigger value="active" className="min-h-[40px]">Active</TabsTrigger>
+                <TabsTrigger value="archived" className="min-h-[40px]">Archived</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <div className="relative flex-1 max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by ID or customer..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 h-11"
+              />
+            </div>
           </div>
-          {!isReadOnly && <AddOrderDialog />}
+          {!isReadOnly && view === 'active' && <AddOrderDialog />}
         </div>
 
         {/* Filters row */}
@@ -180,7 +193,10 @@ export function OrdersTable({ userRole }: OrdersTableProps) {
                   return (
                     <TableRow
                       key={order.id}
-                      className="cursor-pointer hover:bg-accent/50"
+                      className={cn(
+                        'cursor-pointer hover:bg-accent/50',
+                        order.is_archived && 'text-muted-foreground italic',
+                      )}
                       onClick={() => setSelectedOrderId(order.id)}
                     >
                       <TableCell className="font-mono text-xs">
@@ -210,7 +226,9 @@ export function OrdersTable({ userRole }: OrdersTableProps) {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground text-xs">
-                        {format(new Date(order.created_at), 'dd MMM, HH:mm')}
+                        {order.is_archived && order.archived_at
+                          ? `Archived ${format(new Date(order.archived_at), 'dd MMM')}`
+                          : format(new Date(order.created_at), 'dd MMM, HH:mm')}
                       </TableCell>
                     </TableRow>
                   )

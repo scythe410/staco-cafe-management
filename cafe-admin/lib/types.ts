@@ -81,6 +81,9 @@ export interface Order {
   created_at: string
   completed_at: string | null
   updated_at: string
+  is_archived: boolean
+  archived_at: string | null
+  archived_by: string | null
 }
 
 export interface OrderItem {
@@ -101,6 +104,9 @@ export interface Expense {
   recorded_by: string
   created_at: string
   updated_at: string
+  is_archived: boolean
+  archived_at: string | null
+  archived_by: string | null
 }
 
 export interface Salary {
@@ -133,6 +139,9 @@ export interface Notification {
   message: string
   is_read: boolean
   created_at: string
+  is_archived: boolean
+  archived_at: string | null
+  archived_by: string | null
 }
 
 export interface Booking {
@@ -164,6 +173,9 @@ export interface Booking {
   updated_at: string
   cancelled_at: string | null
   cancellation_reason: string | null
+  is_archived: boolean
+  archived_at: string | null
+  archived_by: string | null
 }
 
 export interface BookingItem {

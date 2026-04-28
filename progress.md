@@ -272,11 +272,27 @@
 - [x] TypeScript check — zero errors
 - [x] Production build — passes clean
 
+### ✅ Phase 13 — Soft-Delete Archive System (COMPLETE)
+- [x] Migration `supabase/migrations/010_archive_system.sql` — `is_archived`, `archived_at`, `archived_by` on orders / expenses / bookings / stock_updates / notifications, partial indexes on active rows, and three SECURITY DEFINER RPCs:
+  - `archive_records_older_than(p_days)` — owner only, bulk archive completed/cancelled/refunded orders, expenses by date, finalised bookings, and read notifications older than the cutoff (returns jsonb counts)
+  - `archive_record(p_table, p_id)` — owner + manager
+  - `unarchive_record(p_table, p_id)` — owner only
+- [x] `hooks/useArchive.ts` — `useArchiveRecord`, `useUnarchiveRecord`, `useArchiveOlderThan` with toast feedback + cross-tab `broadcastInvalidate`
+- [x] Display queries filter `is_archived = false` by default, with an opt-in `archived` filter for the per-module Archived view (`useOrders`, `useExpenses`, `useBookings`, `useNotifications`)
+- [x] Aggregate / financial / reporting queries intentionally include archived rows — explanatory comments added to `useFinanceSummary`, `useRevenueByDay`, `usePaymentMethodSplit`, `useExpenseBreakdown`, `usePlatformEarnings`, `useMonthComparison`, dashboard widgets, and bookings reporting hooks so future edits don't accidentally hide archived history from totals
+- [x] Detail dialogs (`order-detail-dialog`, `booking-detail-dialog`) — Archive button on final-state records (owner + manager); Restore button on archived records (owner only); status-change buttons hidden once archived
+- [x] Active / Archived tab toggle on Orders, Expenses, and Bookings tables — archived rows render muted + italic with "Archived {date}" indicator; create buttons hidden in archived view
+- [x] Owner-only Settings page — `/settings` route with Account card + Data Management card (preset Clear History windows: 30 / 60 / 90 / 180 / 365 days), AlertDialog confirmation, calls `useArchiveOlderThan`
+- [x] Settings nav entry gated by `ownerOnly` flag in `constants/navigation.ts` — sidebar + bottom-nav skip the link for non-owners
+- [x] Types updated — archive columns added to Order, Expense, Booking, Notification in `lib/types.ts`
+- [x] TypeScript check — zero errors
+
 ## Known issues / blockers
 - None
 
 ## Notes for next session
 - Run `supabase/migrations/006_create_order_rpc.sql` in Supabase SQL Editor before testing order creation.
+- Run `supabase/migrations/010_archive_system.sql` to enable the soft-delete archive system (already pushed via `supabase db push`).
 - MVP 1 is fully complete with branding and deployed to Vercel.
 - Next steps: start Phase 2 features (recipe-based inventory deduction, supplier management, forecasting).
 - Run `supabase/migrations/002_notification_triggers.sql` in Supabase SQL editor to enable notification Realtime + salary due function.

@@ -52,7 +52,8 @@ export function useFinanceSummary(range: DateRange) {
   return useQuery({
     queryKey: ['finance', 'summary', range],
     queryFn: async () => {
-      // Total income from completed orders
+      // Aggregate query: do NOT filter is_archived — financial totals must
+      // include archived rows so historical figures stay correct.
       const { data: orders, error: ordersErr } = await supabase
         .from('orders')
         .select('total_amount, discount, tax')
@@ -100,6 +101,7 @@ export function useRevenueByDay(range: DateRange) {
   return useQuery({
     queryKey: ['finance', 'revenueByDay', range],
     queryFn: async () => {
+      // Aggregate query: archived orders intentionally included.
       const { data, error } = await supabase
         .from('orders')
         .select('total_amount, discount, tax, created_at')
@@ -142,6 +144,7 @@ export function usePaymentMethodSplit(range: DateRange) {
   return useQuery({
     queryKey: ['finance', 'paymentSplit', range],
     queryFn: async () => {
+      // Aggregate query: archived orders intentionally included.
       const { data, error } = await supabase
         .from('orders')
         .select('payment_method, total_amount')
@@ -176,6 +179,7 @@ export interface MonthComparison {
   expenseGrowth: number | null
 }
 
+// Aggregate query: archived orders/expenses intentionally included.
 export function useMonthComparison() {
   return useQuery({
     queryKey: ['finance', 'monthComparison'],
@@ -254,15 +258,20 @@ export interface ExpenseFilters {
   category?: ExpenseCategory | 'all'
   dateFrom?: string
   dateTo?: string
+  archived?: boolean // false (default) = active list, true = archived viewer
 }
 
 export function useExpenses(filters: ExpenseFilters = {}) {
   return useQuery({
     queryKey: ['finance', 'expenses', filters],
     queryFn: async () => {
+      // Display query: hide archived rows by default. Aggregates above
+      // (useFinanceSummary, useRevenueByDay, useExpenseBreakdown, etc.)
+      // intentionally read all rows so historical totals stay correct.
       let query = supabase
         .from('expenses')
         .select('*')
+        .eq('is_archived', filters.archived === true)
         .order('date', { ascending: false })
 
       if (filters.category && filters.category !== 'all') {
@@ -293,6 +302,7 @@ export function useExpenseBreakdown(range: DateRange) {
   return useQuery({
     queryKey: ['finance', 'expenseBreakdown', range],
     queryFn: async () => {
+      // Aggregate query: archived expenses intentionally included.
       const bkFromDate = toSLDateString(range.from)
       const bkToDate = toSLDateString(range.to)
       const { data, error } = await supabase
@@ -375,6 +385,7 @@ export function usePlatformEarnings(range: DateRange) {
   return useQuery({
     queryKey: ['finance', 'platformEarnings', range],
     queryFn: async () => {
+      // Aggregate query: archived orders intentionally included.
       const { data, error } = await supabase
         .from('orders')
         .select('source, total_amount, commission')

@@ -53,7 +53,7 @@ function trimSeconds(t: string): string {
   return t.length >= 5 ? t.slice(0, 5) : t
 }
 
-type ViewTab = 'upcoming' | 'today' | 'calendar' | 'past' | 'all'
+type ViewTab = 'upcoming' | 'today' | 'calendar' | 'past' | 'all' | 'archived'
 
 export function BookingsTable({ userRole }: BookingsTableProps) {
   const canCreate = userRole === ROLES.OWNER || userRole === ROLES.MANAGER || userRole === ROLES.CASHIER
@@ -68,14 +68,22 @@ export function BookingsTable({ userRole }: BookingsTableProps) {
   const [printingId, setPrintingId] = useState<string | null>(null)
 
   // Active view filter
+  const isArchivedView = view === 'archived'
   const filters: BookingFilters = {
-    view: view === 'calendar' && calendarDate ? 'date' : (view === 'calendar' ? 'all' : view),
+    view: isArchivedView
+      ? 'all'
+      : view === 'calendar' && calendarDate
+        ? 'date'
+        : view === 'calendar'
+          ? 'all'
+          : view,
     date: view === 'calendar' && calendarDate ? calendarDate : undefined,
     status: statusFilter,
     source: sourceFilter,
     dateFrom: dateFrom || undefined,
     dateTo: dateTo || undefined,
     search: search.trim() || undefined,
+    archived: isArchivedView,
   }
 
   const { data: bookings, isLoading, isError } = useBookings(filters)
@@ -113,9 +121,10 @@ export function BookingsTable({ userRole }: BookingsTableProps) {
           <TabsTrigger value="calendar">Calendar</TabsTrigger>
           <TabsTrigger value="past">Past</TabsTrigger>
           <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="archived">Archived</TabsTrigger>
         </TabsList>
 
-        {canCreate && (
+        {canCreate && !isArchivedView && (
           <BookingFormDialog
             trigger={
               <Button className="h-11 gap-1.5">
@@ -230,7 +239,10 @@ export function BookingsTable({ userRole }: BookingsTableProps) {
                     return (
                       <TableRow
                         key={b.id}
-                        className="cursor-pointer hover:bg-accent/50 min-h-[44px]"
+                        className={cn(
+                          'cursor-pointer hover:bg-accent/50 min-h-[44px]',
+                          b.is_archived && 'text-muted-foreground italic',
+                        )}
                         onClick={() => setSelectedId(b.id)}
                       >
                         <TableCell className="font-mono text-xs">{b.booking_code}</TableCell>

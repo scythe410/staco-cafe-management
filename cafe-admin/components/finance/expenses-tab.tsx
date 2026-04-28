@@ -11,6 +11,7 @@ import {
 } from 'recharts'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
@@ -27,13 +28,18 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Archive, RotateCcw } from 'lucide-react'
 import { useExpenses, useExpenseBreakdown, type DateRange } from '@/hooks/useFinance'
-import { formatCurrency, formatDate } from '@/lib/utils'
+import { useArchiveRecord, useUnarchiveRecord } from '@/hooks/useArchive'
+import { formatCurrency, formatDate, cn } from '@/lib/utils'
 import {
   EXPENSE_CATEGORY,
   EXPENSE_CATEGORY_LABELS,
   type ExpenseCategory,
 } from '@/constants/expenses'
+import { ROLES, type Role } from '@/constants/roles'
+import { format } from 'date-fns'
 import { AddExpenseDialog } from './add-expense-dialog'
 
 const ALL = 'all'
@@ -41,25 +47,42 @@ const ALL = 'all'
 interface ExpensesTabProps {
   range: DateRange
   userId: string
+  userRole: Role
 }
 
-export function ExpensesTab({ range, userId }: ExpensesTabProps) {
+type View = 'active' | 'archived'
+
+export function ExpensesTab({ range, userId, userRole }: ExpensesTabProps) {
   const [categoryFilter, setCategoryFilter] = useState<ExpenseCategory | 'all'>(ALL)
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
+  const [view, setView] = useState<View>('active')
 
   const { data: expenses, isLoading, isError } = useExpenses({
     category: categoryFilter,
     dateFrom: dateFrom || undefined,
     dateTo: dateTo || undefined,
+    archived: view === 'archived',
   })
   const { data: breakdown, isLoading: loadingBreakdown } = useExpenseBreakdown(range)
+
+  const archiveRecord = useArchiveRecord()
+  const unarchiveRecord = useUnarchiveRecord()
+
+  const canArchive  = userRole === ROLES.OWNER || userRole === ROLES.MANAGER
+  const canRestore  = userRole === ROLES.OWNER
 
   return (
     <div className="space-y-6">
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
+          <Tabs value={view} onValueChange={(v) => setView(v as View)}>
+            <TabsList>
+              <TabsTrigger value="active" className="min-h-[40px]">Active</TabsTrigger>
+              <TabsTrigger value="archived" className="min-h-[40px]">Archived</TabsTrigger>
+            </TabsList>
+          </Tabs>
           <Select
             value={categoryFilter}
             onValueChange={(v) => setCategoryFilter(v as ExpenseCategory | 'all')}
@@ -89,7 +112,7 @@ export function ExpensesTab({ range, userId }: ExpensesTabProps) {
             className="w-[150px] h-10"
           />
         </div>
-        <AddExpenseDialog userId={userId} />
+        {view === 'active' && <AddExpenseDialog userId={userId} />}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -168,18 +191,23 @@ export function ExpensesTab({ range, userId }: ExpensesTabProps) {
                     <TableHead>Category</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
+                    {view === 'archived' && <TableHead>Archived</TableHead>}
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {!expenses || expenses.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                        No expenses found
+                      <TableCell colSpan={view === 'archived' ? 6 : 5} className="text-center text-muted-foreground py-8">
+                        {view === 'archived' ? 'No archived expenses' : 'No expenses found'}
                       </TableCell>
                     </TableRow>
                   ) : (
                     expenses.map((expense) => (
-                      <TableRow key={expense.id}>
+                      <TableRow
+                        key={expense.id}
+                        className={cn(view === 'archived' && 'text-muted-foreground italic')}
+                      >
                         <TableCell className="text-muted-foreground">
                           {formatDate(expense.date)}
                         </TableCell>
@@ -191,6 +219,39 @@ export function ExpensesTab({ range, userId }: ExpensesTabProps) {
                         <TableCell>{expense.description || '—'}</TableCell>
                         <TableCell className="text-right font-medium">
                           {formatCurrency(expense.amount)}
+                        </TableCell>
+                        {view === 'archived' && (
+                          <TableCell className="text-xs">
+                            {expense.archived_at
+                              ? format(new Date(expense.archived_at), 'dd MMM yyyy')
+                              : '—'}
+                          </TableCell>
+                        )}
+                        <TableCell className="text-right">
+                          {view === 'active' && canArchive && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() =>
+                                archiveRecord.mutate({ table: 'expenses', id: expense.id })
+                              }
+                              disabled={archiveRecord.isPending}
+                            >
+                              <Archive className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
+                          {view === 'archived' && canRestore && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() =>
+                                unarchiveRecord.mutate({ table: 'expenses', id: expense.id })
+                              }
+                              disabled={unarchiveRecord.isPending}
+                            >
+                              <RotateCcw className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))

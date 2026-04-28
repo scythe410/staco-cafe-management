@@ -11,9 +11,11 @@ export function useNotifications() {
   return useQuery({
     queryKey: ['notifications'],
     queryFn: async () => {
+      // Display query: hide archived notifications.
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
+        .eq('is_archived', false)
         .order('is_read', { ascending: true })
         .order('created_at', { ascending: false })
         .limit(20)
@@ -33,6 +35,7 @@ export function useUnreadCount() {
         .from('notifications')
         .select('id', { count: 'exact', head: true })
         .eq('is_read', false)
+        .eq('is_archived', false)
 
       if (error) throw error
       return count ?? 0

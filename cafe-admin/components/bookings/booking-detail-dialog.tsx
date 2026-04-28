@@ -26,12 +26,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Printer, Pencil, X, CheckCircle2, PlayCircle, UserX } from 'lucide-react'
+import { Printer, Pencil, X, CheckCircle2, PlayCircle, UserX, Archive, RotateCcw } from 'lucide-react'
 import {
   useBooking,
   useUpdateBookingStatus,
   useRecordBookingPayment,
 } from '@/hooks/useBookings'
+import { useArchiveRecord, useUnarchiveRecord } from '@/hooks/useArchive'
 import { formatCurrency, cn, toSLDateString, startOfTodaySL } from '@/lib/utils'
 import {
   BOOKING_STATUS,
@@ -75,6 +76,8 @@ export function BookingDetailDialog({
   const { data: booking, isLoading } = useBooking(bookingId)
   const updateStatus = useUpdateBookingStatus()
   const recordPayment = useRecordBookingPayment()
+  const archiveRecord = useArchiveRecord()
+  const unarchiveRecord = useUnarchiveRecord()
 
   const [editOpen, setEditOpen] = useState(false)
   const [cancelOpen, setCancelOpen] = useState(false)
@@ -86,6 +89,23 @@ export function BookingDetailDialog({
 
   const canEdit = userRole === ROLES.OWNER || userRole === ROLES.MANAGER
   const canPrint = canEdit || userRole === ROLES.CASHIER
+  const canRestore = userRole === ROLES.OWNER
+
+  function handleArchive() {
+    if (!booking) return
+    archiveRecord.mutate(
+      { table: 'bookings', id: booking.id },
+      { onSuccess: () => onOpenChange(false) },
+    )
+  }
+
+  function handleRestore() {
+    if (!booking) return
+    unarchiveRecord.mutate(
+      { table: 'bookings', id: booking.id },
+      { onSuccess: () => onOpenChange(false) },
+    )
+  }
 
   function handlePrintReceipt() {
     if (!booking) return
@@ -148,11 +168,19 @@ export function BookingDetailDialog({
   const isToday = booking?.booking_date === today
   const status = booking?.status as BookingStatus | undefined
 
-  // Status workflow buttons (owner/manager only):
-  const showInProgress = canEdit && isToday && status === BOOKING_STATUS.CONFIRMED
-  const showComplete   = canEdit && (status === BOOKING_STATUS.IN_PROGRESS || (isToday && status === BOOKING_STATUS.CONFIRMED))
-  const showNoShow     = canEdit && (status === BOOKING_STATUS.CONFIRMED || status === BOOKING_STATUS.TENTATIVE)
-  const showCancel     = canEdit && status !== BOOKING_STATUS.COMPLETED && status !== BOOKING_STATUS.CANCELLED
+  const isArchived = booking?.is_archived ?? false
+  const isFinal =
+    status === BOOKING_STATUS.COMPLETED ||
+    status === BOOKING_STATUS.CANCELLED ||
+    status === BOOKING_STATUS.NO_SHOW
+
+  // Status workflow buttons (owner/manager only). Suppress when archived.
+  const showInProgress = !isArchived && canEdit && isToday && status === BOOKING_STATUS.CONFIRMED
+  const showComplete   = !isArchived && canEdit && (status === BOOKING_STATUS.IN_PROGRESS || (isToday && status === BOOKING_STATUS.CONFIRMED))
+  const showNoShow     = !isArchived && canEdit && (status === BOOKING_STATUS.CONFIRMED || status === BOOKING_STATUS.TENTATIVE)
+  const showCancel     = !isArchived && canEdit && status !== BOOKING_STATUS.COMPLETED && status !== BOOKING_STATUS.CANCELLED
+  const showArchive    = !isArchived && canEdit && isFinal
+  const showRestore    = isArchived && canRestore
 
   return (
     <>
@@ -468,6 +496,28 @@ export function BookingDetailDialog({
                   <Button variant="destructive" className="h-11 ml-auto" onClick={() => setCancelOpen(true)}>
                     <X className="h-4 w-4 mr-2" />
                     Cancel
+                  </Button>
+                )}
+                {showArchive && (
+                  <Button
+                    variant="outline"
+                    className="h-11"
+                    onClick={handleArchive}
+                    disabled={archiveRecord.isPending}
+                  >
+                    <Archive className="h-4 w-4 mr-2" />
+                    Archive
+                  </Button>
+                )}
+                {showRestore && (
+                  <Button
+                    variant="outline"
+                    className="h-11"
+                    onClick={handleRestore}
+                    disabled={unarchiveRecord.isPending}
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Restore
                   </Button>
                 )}
               </div>

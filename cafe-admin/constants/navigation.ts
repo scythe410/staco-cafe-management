@@ -7,6 +7,7 @@ import {
   CalendarCheck,
   Users,
   FileBarChart,
+  Settings,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -14,6 +15,7 @@ export interface NavItem {
   label: string
   href: string
   icon: LucideIcon
+  ownerOnly?: boolean
 }
 
 export const NAV_ITEMS: NavItem[] = [
@@ -25,4 +27,5 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Bookings', href: '/bookings', icon: CalendarCheck },
   { label: 'Employees', href: '/employees', icon: Users },
   { label: 'Reports', href: '/reports', icon: FileBarChart },
+  { label: 'Settings', href: '/settings', icon: Settings, ownerOnly: true },
 ]

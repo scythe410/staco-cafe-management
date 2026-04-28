@@ -18,6 +18,7 @@ export function BottomNav({ userRole }: BottomNavProps) {
   const { data: unavailableMenuCount } = useUnavailableMenuCount()
 
   const visibleItems = NAV_ITEMS.filter((item) => {
+    if (item.ownerOnly && userRole !== ROLES.OWNER) return false
     if (userRole === ROLES.OWNER) return true
     const allowed = ROLE_ALLOWED_ROUTES[userRole] ?? []
     return allowed.some((prefix) => item.href.startsWith(prefix))

@@ -47,6 +47,7 @@ export function Sidebar({ userName, userRole }: SidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {NAV_ITEMS.filter((item) => {
+          if (item.ownerOnly && userRole !== ROLES.OWNER) return false
           if (userRole === ROLES.OWNER) return true
           const allowed = ROLE_ALLOWED_ROUTES[userRole] ?? []
           return allowed.some((prefix) => item.href.startsWith(prefix))

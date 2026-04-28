@@ -16,8 +16,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Printer } from 'lucide-react'
+import { Printer, Archive, RotateCcw } from 'lucide-react'
 import { useOrderDetail, useUpdateOrderStatus } from '@/hooks/useOrders'
+import { useArchiveRecord, useUnarchiveRecord } from '@/hooks/useArchive'
 import { formatCurrency } from '@/lib/utils'
 import {
   ORDER_STATUS,
@@ -51,6 +52,8 @@ interface OrderDetailDialogProps {
 export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = false, userRole }: OrderDetailDialogProps) {
   const { data: order, isLoading } = useOrderDetail(orderId)
   const updateStatus = useUpdateOrderStatus()
+  const archiveRecord = useArchiveRecord()
+  const unarchiveRecord = useUnarchiveRecord()
 
   function handleAdvance() {
     if (!order) return
@@ -100,6 +103,8 @@ export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = fals
   }
 
   const canPrint = userRole === ROLES.OWNER || userRole === ROLES.MANAGER || userRole === ROLES.CASHIER
+  const canArchive = userRole === ROLES.OWNER || userRole === ROLES.MANAGER
+  const canRestore = userRole === ROLES.OWNER
 
   const hasCommission = order && COMMISSION_SOURCES.includes(order.source as OrderSource)
   const nextLabel = order ? NEXT_STATUS_LABEL[order.status as OrderStatus] : null
@@ -108,6 +113,22 @@ export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = fals
     order.status === ORDER_STATUS.CANCELLED ||
     order.status === ORDER_STATUS.REFUNDED
   )
+
+  function handleArchive() {
+    if (!order) return
+    archiveRecord.mutate(
+      { table: 'orders', id: order.id },
+      { onSuccess: () => onOpenChange(false) },
+    )
+  }
+
+  function handleRestore() {
+    if (!order) return
+    unarchiveRecord.mutate(
+      { table: 'orders', id: order.id },
+      { onSuccess: () => onOpenChange(false) },
+    )
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -237,8 +258,8 @@ export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = fals
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2 pt-2">
-              {!isFinal && !readOnly && (
+            <div className="flex gap-2 pt-2 flex-wrap">
+              {!isFinal && !readOnly && !order.is_archived && (
                 <>
                   {nextLabel && (
                     <Button
@@ -267,6 +288,28 @@ export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = fals
                 >
                   <Printer className="h-4 w-4 mr-2" />
                   Print Bill
+                </Button>
+              )}
+              {!order.is_archived && isFinal && canArchive && (
+                <Button
+                  variant="outline"
+                  className="h-11"
+                  onClick={handleArchive}
+                  disabled={archiveRecord.isPending}
+                >
+                  <Archive className="h-4 w-4 mr-2" />
+                  Archive
+                </Button>
+              )}
+              {order.is_archived && canRestore && (
+                <Button
+                  variant="outline"
+                  className="h-11"
+                  onClick={handleRestore}
+                  disabled={unarchiveRecord.isPending}
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Restore
                 </Button>
               )}
             </div>

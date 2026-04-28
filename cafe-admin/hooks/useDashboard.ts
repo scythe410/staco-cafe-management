@@ -21,6 +21,7 @@ export function useTodaySales() {
   return useQuery({
     queryKey: ['dashboard', 'todaySales'],
     queryFn: async () => {
+      // Aggregate query: archived orders intentionally included.
       const { data, error } = await supabase
         .from('orders')
         .select('total_amount')

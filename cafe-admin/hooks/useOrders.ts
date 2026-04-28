@@ -54,6 +54,7 @@ export interface OrderFilters {
   dateFrom?: string // ISO date
   dateTo?: string   // ISO date
   search?: string   // order ID or customer name
+  archived?: boolean // false (default) = active list, true = archived viewer
 }
 
 // ─── Orders list ────────────────────────────────────────────────
@@ -63,9 +64,12 @@ export function useOrders(filters: OrderFilters = {}) {
   return useQuery({
     queryKey: ['orders', filters],
     queryFn: async () => {
+      // Display query: hide archived rows by default. Financial / reporting
+      // queries live elsewhere and must NOT pass through this filter.
       let query = supabase
         .from('orders')
         .select('*, order_items(count)')
+        .eq('is_archived', filters.archived === true)
         .order('created_at', { ascending: false })
 
       if (filters.source && filters.source !== 'all') {
