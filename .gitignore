@@ -25,3 +25,6 @@ notes.md
 
 # Supabase CLI temp files
 supabase/.temp/
+
+# Claude / MCP local config
+.mcp.json
