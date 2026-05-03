@@ -54,9 +54,10 @@ export function useFinanceSummary(range: DateRange) {
     queryFn: async () => {
       // Aggregate query: do NOT filter is_archived — financial totals must
       // include archived rows so historical figures stay correct.
+      // total_amount is the stored final value (subtotal − discount + service_charge + tax).
       const { data: orders, error: ordersErr } = await supabase
         .from('orders')
-        .select('total_amount, discount, tax')
+        .select('total_amount')
         .eq('status', ORDER_STATUS.COMPLETED)
         .gte('created_at', range.from)
         .lt('created_at', range.to)
@@ -64,7 +65,7 @@ export function useFinanceSummary(range: DateRange) {
       if (ordersErr) throw ordersErr
 
       const totalIncome = (orders ?? []).reduce(
-        (sum, o) => sum + o.total_amount - o.discount + o.tax, 0,
+        (sum, o) => sum + o.total_amount, 0,
       )
       const totalOrders = orders?.length ?? 0
 
@@ -102,9 +103,10 @@ export function useRevenueByDay(range: DateRange) {
     queryKey: ['finance', 'revenueByDay', range],
     queryFn: async () => {
       // Aggregate query: archived orders intentionally included.
+      // total_amount is the stored final value (subtotal − discount + service_charge + tax).
       const { data, error } = await supabase
         .from('orders')
-        .select('total_amount, discount, tax, created_at')
+        .select('total_amount, created_at')
         .eq('status', ORDER_STATUS.COMPLETED)
         .gte('created_at', range.from)
         .lt('created_at', range.to)
@@ -114,8 +116,7 @@ export function useRevenueByDay(range: DateRange) {
       const buckets = new Map<string, number>()
       for (const o of data ?? []) {
         const day = format(new Date(o.created_at), 'dd MMM')
-        const net = o.total_amount - o.discount + o.tax
-        buckets.set(day, (buckets.get(day) ?? 0) + net)
+        buckets.set(day, (buckets.get(day) ?? 0) + o.total_amount)
       }
 
       return Array.from(buckets.entries()).map(([day, revenue]) => ({
@@ -189,10 +190,11 @@ export function useMonthComparison() {
       const prevStart = startOfPreviousMonthSL()
       const prevEnd = curStart // previous month ends where current starts
 
+      // total_amount is the stored final value (subtotal − discount + service_charge + tax).
       // Current month orders
       const { data: curOrders, error: e1 } = await supabase
         .from('orders')
-        .select('total_amount, discount, tax')
+        .select('total_amount')
         .eq('status', ORDER_STATUS.COMPLETED)
         .gte('created_at', curStart)
         .lt('created_at', curEnd)
@@ -201,7 +203,7 @@ export function useMonthComparison() {
       // Previous month orders
       const { data: prevOrders, error: e2 } = await supabase
         .from('orders')
-        .select('total_amount, discount, tax')
+        .select('total_amount')
         .eq('status', ORDER_STATUS.COMPLETED)
         .gte('created_at', prevStart)
         .lt('created_at', prevEnd)
@@ -229,8 +231,8 @@ export function useMonthComparison() {
         .lte('date', prevEndDate)
       if (e4) throw e4
 
-      const currentIncome = (curOrders ?? []).reduce((s, o) => s + o.total_amount - o.discount + o.tax, 0)
-      const previousIncome = (prevOrders ?? []).reduce((s, o) => s + o.total_amount - o.discount + o.tax, 0)
+      const currentIncome = (curOrders ?? []).reduce((s, o) => s + o.total_amount, 0)
+      const previousIncome = (prevOrders ?? []).reduce((s, o) => s + o.total_amount, 0)
       const currentExpenses = (curExp ?? []).reduce((s, e) => s + e.amount, 0)
       const previousExpenses = (prevExp ?? []).reduce((s, e) => s + e.amount, 0)
 

@@ -13,7 +13,13 @@ import type { OrderDetail } from '@/hooks/useOrders'
 
 export function getBillHtml(order: OrderDetail): string {
   const hasCommission = COMMISSION_SOURCES.includes(order.source as OrderSource)
-  const finalTotal = order.total_amount - order.discount + order.tax - (hasCommission ? order.commission : 0)
+  const subtotal = order.order_items.reduce(
+    (sum, i) => sum + i.unit_price * i.quantity, 0,
+  )
+  const serviceCharge = order.service_charge ?? 0
+  const finalTotal =
+    subtotal - order.discount + serviceCharge + order.tax
+    - (hasCommission ? order.commission : 0)
   const orderIdShort = order.id.slice(-8).toUpperCase()
   const origin = typeof window !== 'undefined' ? window.location.origin : ''
 
@@ -28,9 +34,12 @@ export function getBillHtml(order: OrderDetail): string {
     </tr>`
   }).join('')
 
-  let totalsHtml = `<tr><td>Subtotal</td><td class="num">${formatCurrency(order.total_amount)}</td></tr>`
+  let totalsHtml = `<tr><td>Subtotal</td><td class="num">${formatCurrency(subtotal)}</td></tr>`
   if (order.discount > 0) {
     totalsHtml += `<tr><td>Discount</td><td class="num" style="color:#dc2626;">-${formatCurrency(order.discount)}</td></tr>`
+  }
+  if (serviceCharge > 0) {
+    totalsHtml += `<tr><td>Service Charge</td><td class="num">+${formatCurrency(serviceCharge)}</td></tr>`
   }
   if (order.tax > 0) {
     totalsHtml += `<tr><td>Tax</td><td class="num">+${formatCurrency(order.tax)}</td></tr>`

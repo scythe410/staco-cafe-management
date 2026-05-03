@@ -224,38 +224,51 @@ export function OrderDetailDialog({ orderId, open, onOpenChange, readOnly = fals
             </div>
 
             {/* Totals */}
-            <div className="space-y-1.5 text-sm border-t pt-3">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span>{formatCurrency(order.total_amount)}</span>
-              </div>
-              {order.discount > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Discount</span>
-                  <span className="text-destructive">-{formatCurrency(order.discount)}</span>
-                </div>
-              )}
-              {order.tax > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tax</span>
-                  <span>{formatCurrency(order.tax)}</span>
-                </div>
-              )}
-              {hasCommission && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Commission ({ORDER_SOURCE_LABELS[order.source as OrderSource]})</span>
-                  <span className="text-destructive">-{formatCurrency(order.commission)}</span>
-                </div>
-              )}
-              <div className="flex justify-between font-semibold pt-1.5 border-t">
-                <span>{hasCommission ? 'Net Amount' : 'Total'}</span>
-                <span>
-                  {formatCurrency(
-                    order.total_amount - order.discount + order.tax - (hasCommission ? order.commission : 0)
+            {(() => {
+              const subtotal = order.order_items.reduce(
+                (sum, i) => sum + i.unit_price * i.quantity, 0,
+              )
+              const serviceCharge = order.service_charge ?? 0
+              const totalDisplay =
+                subtotal - order.discount + serviceCharge + order.tax
+                - (hasCommission ? order.commission : 0)
+              return (
+                <div className="space-y-1.5 text-sm border-t pt-3">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span>{formatCurrency(subtotal)}</span>
+                  </div>
+                  {order.discount > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Discount</span>
+                      <span className="text-destructive">-{formatCurrency(order.discount)}</span>
+                    </div>
                   )}
-                </span>
-              </div>
-            </div>
+                  {serviceCharge > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Service Charge</span>
+                      <span>+{formatCurrency(serviceCharge)}</span>
+                    </div>
+                  )}
+                  {order.tax > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Tax</span>
+                      <span>+{formatCurrency(order.tax)}</span>
+                    </div>
+                  )}
+                  {hasCommission && order.commission > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Commission ({ORDER_SOURCE_LABELS[order.source as OrderSource]})</span>
+                      <span className="text-destructive">-{formatCurrency(order.commission)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-semibold pt-1.5 border-t">
+                    <span>TOTAL</span>
+                    <span>{formatCurrency(totalDisplay)}</span>
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* Actions */}
             <div className="flex gap-2 pt-2 flex-wrap">

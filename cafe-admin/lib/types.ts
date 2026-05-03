@@ -73,10 +73,11 @@ export interface Order {
   source: 'dine_in' | 'takeaway' | 'pickmefood' | 'ubereats' | 'other'
   status: 'new_order' | 'accepted' | 'preparing' | 'ready' | 'completed' | 'cancelled' | 'refunded'
   customer_name: string | null
-  total_amount: number // cents
-  discount: number     // cents
-  tax: number          // cents
-  commission: number   // cents
+  total_amount: number    // cents — final total (subtotal − discount + service_charge + tax)
+  discount: number        // cents
+  service_charge: number  // cents
+  tax: number             // cents
+  commission: number      // cents
   payment_method: 'cash' | 'card' | 'online' | 'other' | null
   created_at: string
   completed_at: string | null

@@ -55,13 +55,36 @@ export function AddOrderDialog() {
   const [customerName, setCustomerName] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PAYMENT_METHOD.CASH)
   const [commission, setCommission] = useState('')
+  const [discount, setDiscount] = useState('')
+  const [serviceCharge, setServiceCharge] = useState('')
+  const [tax, setTax] = useState('')
   const [lines, setLines] = useState<LineItem[]>([])
   const [toppingsExpanded, setToppingsExpanded] = useState(false)
 
-  const total = useMemo(
+  const subtotal = useMemo(
     () => lines.reduce((sum, l) => sum + l.unit_price * l.quantity, 0),
     [lines],
   )
+
+  // Convert LKR text input → cents. Negative or invalid values fall back to 0
+  // (rejected on input via the change handlers below).
+  const discountCents = Math.max(0, Math.round((parseFloat(discount) || 0) * 100))
+  const serviceChargeCents = Math.max(0, Math.round((parseFloat(serviceCharge) || 0) * 100))
+  const taxCents = Math.max(0, Math.round((parseFloat(tax) || 0) * 100))
+
+  const total = subtotal - discountCents + serviceChargeCents + taxCents
+
+  const discountExceedsSubtotal = discountCents > subtotal && subtotal > 0
+
+  // Reject negative input immediately — clamp to '0' instead of waiting for submit.
+  function handleNumericChange(
+    setter: (v: string) => void,
+  ): (e: React.ChangeEvent<HTMLInputElement>) => void {
+    return (e) => {
+      const v = e.target.value
+      if (v === '' || parseFloat(v) >= 0) setter(v)
+    }
+  }
 
   // Set of currently-available menu item IDs — used to flag cart lines
   // whose underlying menu item was marked unavailable mid-session.
@@ -115,6 +138,9 @@ export function AddOrderDialog() {
     setCustomerName('')
     setPaymentMethod(PAYMENT_METHOD.CASH)
     setCommission('')
+    setDiscount('')
+    setServiceCharge('')
+    setTax('')
     setLines([])
     setToppingsExpanded(false)
   }
@@ -128,6 +154,15 @@ export function AddOrderDialog() {
       if (commErr) { toast.error(commErr); return }
     }
 
+    const discountErr = validatePositiveNumber(discount || '0', 'Discount', { allowZero: true })
+    if (discountErr) { toast.error(discountErr); return }
+    const serviceErr = validatePositiveNumber(serviceCharge || '0', 'Service charge', { allowZero: true })
+    if (serviceErr) { toast.error(serviceErr); return }
+    const taxErr = validatePositiveNumber(tax || '0', 'Tax', { allowZero: true })
+    if (taxErr) { toast.error(taxErr); return }
+
+    if (discountExceedsSubtotal) return
+
     for (const line of lines) {
       const qtyErr = validatePositiveNumber(line.quantity, 'Item quantity')
       if (qtyErr) { toast.error(qtyErr); return }
@@ -139,6 +174,9 @@ export function AddOrderDialog() {
         customer_name: customerName.trim() || null,
         payment_method: paymentMethod,
         commission: showCommission ? Math.round(parseFloat(commission || '0') * 100) : 0,
+        discount: discountCents,
+        service_charge: serviceChargeCents,
+        tax: taxCents,
         items: lines.map((l) => ({
           menu_item_id: l.menu_item_id,
           quantity: l.quantity,
@@ -210,39 +248,6 @@ export function AddOrderDialog() {
                 className="h-11"
               />
             </div>
-          </div>
-
-          {/* Payment + Commission */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>Payment Method</Label>
-              <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}>
-                <SelectTrigger className="h-11">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(PAYMENT_METHOD).map((p) => (
-                    <SelectItem key={p} value={p}>
-                      {PAYMENT_METHOD_LABELS[p]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {showCommission && (
-              <div className="space-y-2">
-                <Label>Commission (LKR)</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={commission}
-                  onChange={(e) => setCommission(e.target.value)}
-                  placeholder="0.00"
-                  className="h-11"
-                />
-              </div>
-            )}
           </div>
 
           {/* Menu items grouped by category */}
@@ -350,17 +355,108 @@ export function AddOrderDialog() {
                 </div>
                 )
               })}
-              <div className="flex justify-between pt-2 border-t font-semibold text-sm">
+              <div className="flex justify-between pt-2 border-t text-sm text-muted-foreground">
+                <span>Subtotal</span>
+                <span>{formatCurrency(subtotal)}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Pricing adjustments — sit between items and payment method */}
+          {lines.length > 0 && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="discount-input">Discount (LKR)</Label>
+                  <Input
+                    id="discount-input"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={discount}
+                    onChange={handleNumericChange(setDiscount)}
+                    placeholder="0.00"
+                    className="h-11"
+                    aria-invalid={discountExceedsSubtotal || undefined}
+                  />
+                  {discountExceedsSubtotal && (
+                    <p className="text-xs text-destructive">
+                      Discount cannot exceed the subtotal
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="service-charge-input">Service Charge (LKR)</Label>
+                  <Input
+                    id="service-charge-input"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={serviceCharge}
+                    onChange={handleNumericChange(setServiceCharge)}
+                    placeholder="0.00"
+                    className="h-11"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="tax-input">Tax (LKR)</Label>
+                  <Input
+                    id="tax-input"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={tax}
+                    onChange={handleNumericChange(setTax)}
+                    placeholder="0.00"
+                    className="h-11"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-between pt-2 border-t font-semibold text-base">
                 <span>Total</span>
                 <span>{formatCurrency(total)}</span>
               </div>
             </div>
           )}
 
+          {/* Payment + Commission */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label>Payment Method</Label>
+              <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}>
+                <SelectTrigger className="h-11">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(PAYMENT_METHOD).map((p) => (
+                    <SelectItem key={p} value={p}>
+                      {PAYMENT_METHOD_LABELS[p]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {showCommission && (
+              <div className="space-y-2">
+                <Label>Commission (LKR)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={commission}
+                  onChange={(e) => setCommission(e.target.value)}
+                  placeholder="0.00"
+                  className="h-11"
+                />
+              </div>
+            )}
+          </div>
+
           <Button
             type="submit"
             className="w-full h-11"
-            disabled={lines.length === 0 || createOrder.isPending}
+            disabled={lines.length === 0 || createOrder.isPending || discountExceedsSubtotal}
           >
             {createOrder.isPending ? 'Creating...' : 'Create Order'}
           </Button>

@@ -272,6 +272,18 @@
 - [x] TypeScript check — zero errors
 - [x] Production build — passes clean
 
+### ✅ Phase 14 — Order Pricing Adjustments (COMPLETE)
+- [x] Discount, Service Charge and Tax fields added to add-order dialog (all optional, default 0, LKR input → cents on save)
+- [x] Live Subtotal / Total computed in form; inline error when discount exceeds subtotal blocks submit; negative values rejected on input
+- [x] Migration `supabase/migrations/012_order_service_charge.sql` adds `service_charge integer NOT NULL DEFAULT 0` to orders (011 was taken by security_hardening)
+- [x] `create_order_with_items` RPC updated to accept `p_service_charge`; total_amount now stored as final value (subtotal − discount + service_charge + tax)
+- [x] `useCreateOrder` recomputes total_amount server-side; passes discount, service_charge, tax to the RPC
+- [x] Order detail dialog shows Subtotal (from line items) + conditional Discount / Service Charge / Tax / Commission rows + bold TOTAL
+- [x] Order bill receipt prints Service Charge row when > 0 (between Discount and Tax)
+- [x] Finance + reports queries updated to read `total_amount` directly (now the final value); legacy `total_amount - discount + tax` arithmetic removed
+- [x] `Order` type in `lib/types.ts` extended with `service_charge: number`
+- [x] TypeScript check — zero errors
+
 ### ✅ Phase 13 — Soft-Delete Archive System (COMPLETE)
 - [x] Migration `supabase/migrations/010_archive_system.sql` — `is_archived`, `archived_at`, `archived_by` on orders / expenses / bookings / stock_updates / notifications, partial indexes on active rows, and three SECURITY DEFINER RPCs:
   - `archive_records_older_than(p_days)` — owner only, bulk archive completed/cancelled/refunded orders, expenses by date, finalised bookings, and read notifications older than the cutoff (returns jsonb counts)
@@ -292,6 +304,7 @@
 
 ## Notes for next session
 - Run `supabase/migrations/006_create_order_rpc.sql` in Supabase SQL Editor before testing order creation.
+- Run `supabase/migrations/012_order_service_charge.sql` to add `service_charge` to orders, then re-deploy `create_order_with_items` with the new `p_service_charge` parameter (statement provided in commit).
 - Run `supabase/migrations/010_archive_system.sql` to enable the soft-delete archive system (already pushed via `supabase db push`).
 - MVP 1 is fully complete with branding and deployed to Vercel.
 - Next steps: start Phase 2 features (recipe-based inventory deduction, supplier management, forecasting).

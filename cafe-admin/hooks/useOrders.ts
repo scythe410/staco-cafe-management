@@ -192,7 +192,10 @@ export interface CreateOrderInput {
   source: OrderSource
   customer_name: string | null
   payment_method: PaymentMethod
-  commission: number // cents
+  commission: number       // cents
+  discount: number         // cents
+  service_charge: number   // cents
+  tax: number              // cents
   items: { menu_item_id: string; quantity: number; unit_price: number }[]
 }
 
@@ -208,15 +211,18 @@ export function useCreateOrder() {
         (sum, item) => sum + item.unit_price * item.quantity,
         0,
       )
+      const total_amount =
+        subtotal - input.discount + input.service_charge + input.tax
 
       const { data, error } = await supabase.rpc('create_order_with_items', {
         p_source: input.source,
         p_customer_name: input.customer_name || null,
         p_payment_method: input.payment_method,
         p_commission: input.commission,
-        p_discount: 0,
-        p_tax: 0,
-        p_total_amount: subtotal,
+        p_discount: input.discount,
+        p_service_charge: input.service_charge,
+        p_tax: input.tax,
+        p_total_amount: total_amount,
         p_items: input.items.map((item) => ({
           menu_item_id: item.menu_item_id,
           quantity: item.quantity,

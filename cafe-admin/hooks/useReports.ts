@@ -111,24 +111,25 @@ export function useMonthlyIncomeReport(month: string) {
       const monthStart = startOfMonth(new Date(month + '-01')).toISOString()
       const monthEnd = endOfMonth(new Date(month + '-01')).toISOString()
 
-      // Revenue from completed orders
+      // Revenue from completed orders.
+      // total_amount is the stored final value (subtotal − discount + service_charge + tax).
       const { data: orders, error: e1 } = await supabase
         .from('orders')
-        .select('source, total_amount, discount, tax, commission')
+        .select('source, total_amount, commission')
         .eq('status', ORDER_STATUS.COMPLETED)
         .gte('created_at', monthStart)
         .lte('created_at', monthEnd)
       if (e1) throw e1
 
       const totalRevenue = (orders ?? []).reduce(
-        (s, o) => s + o.total_amount - o.discount + o.tax, 0,
+        (s, o) => s + o.total_amount, 0,
       )
 
       // Revenue by source
       const srcMap = new Map<string, { revenue: number; commission: number }>()
       for (const o of orders ?? []) {
         const prev = srcMap.get(o.source) ?? { revenue: 0, commission: 0 }
-        prev.revenue += o.total_amount - o.discount + o.tax
+        prev.revenue += o.total_amount
         prev.commission += o.commission
         srcMap.set(o.source, prev)
       }
